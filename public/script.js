@@ -257,6 +257,7 @@ function drawBars() {
 }
 
 function startup() {
+  document.getElementById('calibrate').addEventListener('click', calibrate);
   el = document.getElementById('touch');
   elTop = el.offsetTop;
   elLeft = el.offsetLeft;
@@ -296,4 +297,27 @@ function startup() {
   }
 }
 
+let ticks = [];
+let tempo = 120;
+let start = 0;
+let calibrateId;
+function calibrate(e) {
+  e.preventDefault();
+  clearTimeout(calibrateId);
+  calibrateId = setTimeout(() => {
+    ticks = [];
+    start = 0;
+  }, 1500);
+  const now = Date.now();
+  if (start) {
+    ticks.push(now - start);
+    tempo =
+      Math.floor(
+        (12000 * ticks.length) / ticks.reduce((acc, t) => acc + t, 0)
+      ) * 5;
+    document.getElementById('tempo').value = tempo;
+    log(tempo);
+  }
+  start = now;
+}
 document.addEventListener('DOMContentLoaded', startup);

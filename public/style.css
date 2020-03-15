@@ -11,3 +11,7 @@ canvas {
 #touch {
   z-index: 2;
 }
+
+.hide {
+  display: none;
+}
