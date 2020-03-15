@@ -4,6 +4,7 @@ canvas {
   border: solid black 1px;
   position: absolute;
   top: 30px;
+  left: 0;
 }
 #bars {
   z-index: 1;
@@ -14,4 +15,23 @@ canvas {
 
 .hide {
   display: none;
+}
+
+#compose-channels::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+#compose-channels {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  width: 400px;
+  overflow-x: scroll;
+}
+
+.compose-channel {
+  width: 500px;
+}
+.compose-channel span {
+  padding: 3px;
+  cursor: pointer;
 }

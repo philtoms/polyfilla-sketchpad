@@ -8,12 +8,21 @@ var elTop;
 var elLeft;
 var ctx;
 var synth;
-var playing = { time: 0, pitch: -100 };
 var speeds = [];
 var lastSpeed = 0;
 var momentum = 0;
 
 const scale = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const samples = {
+  A0: 'A0.mp3',
+  A1: 'A1.mp3',
+  A2: 'A2.mp3',
+  A3: 'A3.mp3',
+  A4: 'A4.mp3',
+  A5: 'A5.mp3',
+  A6: 'A6.mp3',
+  A7: 'A7.mp3'
+};
 
 const basenotes = [...scale, ...scale, ...scale]
   .slice(0, 400 / 40)
@@ -50,8 +59,57 @@ function select(oidx, y, m, d) {
   return {};
 }
 
-function play(px, py, channel, lastPy) {
-  let speed = lastPy ? parseInt((py - lastPy) * 100) : lastSpeed;
+const channels = {
+  0: [],
+  1: [],
+  2: []
+};
+function register(channel, note, touch) {
+  const elChannels = document.getElementById('compose-channels');
+  const elChannel = document.getElementById(`channel-${channel}`);
+  const idx = channels[channel].length;
+  elChannel.innerHTML =
+    elChannel.innerHTML + `<span id="${channel}-${idx}"> ${note} </span>`;
+  const el = document.getElementById(`${channel}-${idx}`);
+  elChannels.scrollLeft = Math.max(0, el.offsetLeft - 375);
+  elChannel.style.width = `${elChannel.clientWidth + el.clientWidth + 30}px`;
+
+  const time = Tone.now();
+  channels[channel].push({
+    idx,
+    note,
+    time,
+    touch
+  });
+  return time;
+}
+
+function replaceReplay(e) {
+  e.preventDefault();
+
+  const replace = e => {
+    e.preventDefault();
+    clearTimeout(replaceId);
+    document
+      .getElementById('compose-channels')
+      .removeEventListener('mouseup', replace);
+  };
+  document
+    .getElementById('compose-channels')
+    .addEventListener('mouseup', replace);
+
+  const replaceId = setTimeout(() => {
+    document
+      .getElementById('compose-channels')
+      .removeEventListener('mouseup', replace);
+  }, 1500);
+}
+
+let lastNote;
+function play(channel, touch, lastTouch) {
+  let speed = lastTouch
+    ? parseInt((touch.pageY - lastTouch.pageY) * 100)
+    : lastSpeed;
   lastSpeed = speed;
   let avgSpeed = speed;
   let maxSpeed = speed;
@@ -69,7 +127,7 @@ function play(px, py, channel, lastPy) {
 
   const momentum = parseInt(
     tail.length > 1
-      ? tail.length * (tail[0].m.pageY - tail[tail.length - 1].l.pageY)
+      ? tail.length * (tail[0].pageY - tail[tail.length - 1].pageY)
       : 0
   );
 
@@ -77,36 +135,32 @@ function play(px, py, channel, lastPy) {
     (speed === 0 || (speeds.length == 8 && maxSpeed < 1500)) &&
     Math.abs(momentum) < 4000;
 
-  const { note, pitch, p1 } = select(px, py, momentum, direction);
+  const { note, pitch, p1 } = select(
+    touch.pageX,
+    touch.pageY,
+    momentum,
+    direction
+  );
 
-  // log(
-  //   `${slip} ${Math.abs(
-  //     tail.length > 1
-  //       ? tail.length * (tail[0].m.pageY - tail[tail.length - 1].l.pageY)
-  //       : 0
-  //   )}`
-  // );
-
-  if (note && note !== playing.note) {
-    log(`${note} ${playing.note}`);
-    //log(`${speed}, ${avgSpeed}, ${note}, ${playing.note}`);
-    // log(`${note}, ${pitch} ${p1.note} ${p1.pitch}`);
-    //    log(`${note},${avgSpeed} ${direction !== playing.direction}`);
+  if (note && note !== lastNote) {
+    log(`${note} ${lastNote}`);
+    const time = register(channel, note, touch);
     synth.triggerAttackRelease(note);
-    playing = { note };
+
+    lastNote = note;
   }
 }
 
-function paint(ctx, m, l, c, t) {
+function paint(ctx, m, l) {
   ctx.beginPath();
-  const color = `rgba(${Object.values(c).join(',')})`;
-  if (t === 'fill') {
-    ctx.arc(m.pageX - elLeft, m.pageY - elTop, 4, 0, 2 * Math.PI, false); // a circle at the start
+  const color = `rgb(0,0,0)`;
+  if (m.paintType === 'fill') {
+    ctx.arc(m.pageX, m.pageY, 4, 0, 2 * Math.PI, false); // a circle at the start
     ctx.fillStyle = color;
     ctx.fill();
   } else {
-    ctx.moveTo(m.pageX - elLeft, m.pageY - elTop);
-    ctx.lineTo(l.pageX - elLeft, l.pageY - elTop);
+    ctx.moveTo(m.pageX, m.pageY);
+    ctx.lineTo(l.pageX, l.pageY);
     ctx.lineWidth = 4;
     ctx.strokeStyle = color;
     ctx.stroke();
@@ -114,107 +168,62 @@ function paint(ctx, m, l, c, t) {
 }
 
 function handleStart(evt) {
-  if (!synth) {
-    // synth = new Tone.AMSynth().toMaster();
-    synth = new Tone.Sampler({
-      A0: 'A0.mp3',
-      A1: 'A1.mp3',
-      A2: 'A2.mp3',
-      A3: 'A3.mp3',
-      A4: 'A4.mp3',
-      A5: 'A5.mp3',
-      A6: 'A6.mp3',
-      A7: 'A7.mp3'
-    }).toMaster();
-  }
   evt.preventDefault();
-  var touches = evt.changedTouches || [
-    { pageX: evt.pageX, pageY: evt.pageY, identifier: 0 }
-  ];
   el.addEventListener('mousemove', handleMove, false);
-  playing = { time: 0, pitch: 0 };
   speeds = [];
-  for (var i = 0; i < touches.length; i++) {
-    var touch = copyTouch(touches[i]);
-    ongoingTouches.push(touch);
-    var color = colorForTouch(touch);
-    paint(ctx, touch, touch, color, 'fill');
-    play(touch.pageX - elLeft, touch.pageY - elTop, touch.identifier);
-    tail.push({ idx: i, m: touch, color, t: 'fill' });
-  }
+  var touch = copyTouch(
+    (evt.changedTouches || [
+      { pageX: evt.pageX, pageY: evt.pageY, identifier: 0 }
+    ])[0],
+    'fill'
+  );
+  ongoingTouches.push(touch);
+  paint(ctx, touch, touch);
+  play(touch.channel, touch);
 }
 
 function handleMove(evt) {
   evt.preventDefault();
-  var touches = evt.changedTouches || [
-    { pageX: evt.pageX, pageY: evt.pageY, identifier: 0 }
-  ];
+  var touch = copyTouch(
+    (evt.changedTouches || [
+      { pageX: evt.pageX, pageY: evt.pageY, identifier: 0 }
+    ])[0]
+  );
 
-  for (var i = 0; i < touches.length; i++) {
-    var touch = copyTouch(touches[i]);
-    var color = colorForTouch(touch);
-    var idx = ongoingTouchIndexById(touch.identifier);
-    if (idx >= 0) {
-      var lastTouch = ongoingTouches[idx];
-      paint(ctx, lastTouch, touch, color);
-      tail.push({ idx, m: lastTouch, l: touch, color });
-      ongoingTouches.splice(idx, 1, touch); // swap in the new touch record
-      play(
-        touch.pageX - elLeft,
-        touch.pageY - elTop,
-        touch.identifier,
-        lastTouch.pageY - elTop
-      );
-    }
-  }
+  var lastTouch = ongoingTouches[0];
+  paint(ctx, lastTouch, touch);
+  ongoingTouches.splice(0, 1, touch); // swap in the new touch record
+  play(touch.channel, touch, lastTouch);
 }
 
 function handleEnd(evt) {
   evt.preventDefault();
   el.removeEventListener('mousemove', handleMove);
-  var touches = evt.changedTouches || [
-    { pageX: evt.pageX, pageY: evt.pageY, identifier: 0 }
-  ];
-
-  for (var i = 0; i < touches.length; i++) {
-    var idx = ongoingTouchIndexById(touches[i].identifier);
-
-    if (idx >= 0) {
-      ongoingTouches.splice(idx, 1); // remove it; we're done
-    }
-    // synth.triggerRelease(playing.note);
-    // synth.triggerAttackRelease(playing.note, 3);
-  }
+  ongoingTouches.splice(0, 1); // remove it; we're done
+  lastNote = '';
+  // synth.triggerRelease(lastNote);
+  // synth.triggerAttackRelease(lastNote, 3);
 }
 function handleCancel(evt) {
   evt.preventDefault();
-  var touches = evt.changedTouches;
-
-  for (var i = 0; i < touches.length; i++) {
-    var idx = ongoingTouchIndexById(touches[i].identifier);
-    ongoingTouches.splice(idx, 1); // remove it; we're done
-  }
+  ongoingTouches.splice(0, 1); // remove it; we're done
   synth.triggerRelease(Tone.Time(3));
 }
 
-function copyTouch({
-  identifier,
-  pageX,
-  pageY,
-  radiusX,
-  radiusY,
-  rotationAngle,
-  force
-}) {
+function copyTouch(
+  { identifier, pageX, pageY, radiusX, radiusY, rotationAngle, force },
+  paintType
+) {
   return {
-    identifier,
-    pageX,
-    pageY,
+    channel: identifier,
+    pageX: pageX - elLeft,
+    pageY: pageY - elTop,
     radiusX,
     radiusY,
     rotationAngle,
     force,
-    time: Date.now()
+    paintType,
+    idx: ongoingTouches.length
   };
 }
 
@@ -229,12 +238,7 @@ function ongoingTouchIndexById(idToFind) {
   return -1; // not found
 }
 function log(msg) {
-  var p = document.getElementById('log');
-  p.innerHTML = msg + '\n' + p.innerHTML.slice(0, 500);
-}
-
-function colorForTouch(touch) {
-  return { 0: 0, 1: 0, 2: 0, ...{ [touch.identifier]: 255 }, 4: 1 };
+  console.log(...[].concat(msg));
 }
 
 function drawBars() {
@@ -254,10 +258,59 @@ function drawBars() {
   ctx.lineWidth = el.clientWidth * 0.5;
   ctx.strokeStyle = `rgba(0,20,00,0.2)`;
   ctx.stroke();
+  document
+    .getElementById('compose-channels')
+    .addEventListener('mousedown', replaceReplay);
 }
 
 function startup() {
   document.getElementById('calibrate').addEventListener('click', calibrate);
+  document.getElementById('go-compose').addEventListener('click', goCompose);
+}
+
+let ticks = [];
+let tempo = 120;
+let lastTick = 0;
+let calibrateId;
+function calibrate(e) {
+  e.preventDefault();
+  clearTimeout(calibrateId);
+  calibrateId = setTimeout(() => {
+    ticks = [];
+    lastTick = 0;
+  }, 1500);
+  const tick = Date.now();
+  if (lastTick) {
+    ticks.push(tick - lastTick);
+    tempo =
+      Math.floor(
+        (12000 * ticks.length) / ticks.reduce((acc, t) => acc + t, 0)
+      ) * 5;
+    document.getElementById('tempo').value = tempo;
+    log(tempo);
+  }
+  lastTick = tick;
+}
+
+function goCompose(e) {
+  e.preventDefault();
+  if (!synth) {
+    // synth = new Tone.AMSynth().toMaster();
+    synth = new Tone.Sampler(samples).toMaster();
+    startContext(Tone.context);
+    try {
+      Object.keys(samples).forEach(s => synth.triggerAttackRelease(s));
+    } catch (e) {}
+  }
+
+  const {
+    tempo: { value: tempo },
+    time: { value: time }
+  } = document.getElementById('params').elements;
+  log(tempo, time);
+
+  document.getElementById('intro').classList.add('hide');
+  document.getElementById('compose').classList.remove('hide');
   el = document.getElementById('touch');
   elTop = el.offsetTop;
   elLeft = el.offsetLeft;
@@ -271,21 +324,7 @@ function startup() {
   el.addEventListener('mouseup', handleEnd, false);
   drawBars();
 
-  const atEnd = ({ color }) => color[4] > 0;
-  setInterval(() => {
-    const stillPlaying = tail.length > 0;
-    tail = tail.filter(atEnd).map(({ idx, color, ...rest }) => ({
-      idx,
-      color: { ...color, 4: (color[4] - 0.1).toFixed(2) },
-      ...rest
-    }));
-    fade();
-    // tail.forEach(({ color, m, l, t }) => paint(ctx, m, l, color, t));
-    // if (stillPlaying && tail.length === 0) {
-    //     synth.triggerRelease()
-    //     playing = false
-    // }
-  }, 30);
+  setInterval(fade, 30);
 
   function fade() {
     const imageData = ctx.getImageData(0, 0, el.width, el.height);
@@ -297,27 +336,20 @@ function startup() {
   }
 }
 
-let ticks = [];
-let tempo = 120;
-let start = 0;
-let calibrateId;
-function calibrate(e) {
-  e.preventDefault();
-  clearTimeout(calibrateId);
-  calibrateId = setTimeout(() => {
-    ticks = [];
-    start = 0;
-  }, 1500);
-  const now = Date.now();
-  if (start) {
-    ticks.push(now - start);
-    tempo =
-      Math.floor(
-        (12000 * ticks.length) / ticks.reduce((acc, t) => acc + t, 0)
-      ) * 5;
-    document.getElementById('tempo').value = tempo;
-    log(tempo);
+function startContext(context) {
+  // this accomplishes the iOS specific requirement
+  var buffer = context.createBuffer(1, 1, context.sampleRate);
+  var source = context.createBufferSource();
+  source.buffer = buffer;
+  try {
+    source.connect(context.destination);
+  } catch (e) {}
+  source.start(0);
+
+  // resume the audio context
+  if (context.resume) {
+    context.resume();
   }
-  start = now;
 }
+
 document.addEventListener('DOMContentLoaded', startup);

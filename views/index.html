@@ -27,21 +27,27 @@
     <main>
       <section id="intro">
         <h1>Starting with...</h1>
-        <form submit="start">
+        <form id="params">
           <select id="time">
             <option>3/4</option>
             <option>4/4</option>
           </select>
           <input placeholder="tempo = 120" id="tempo" type="number" />
           <button id="calibrate">Calibrate</button>
+          <div>
+            <button id="go-compose" type="submit">Go compose!</button>
+          </div>
         </form>
       </section>
       <section id="compose" class="hide">
+        <div id="compose-channels">
+          <div class="compose-channel" id="channel-0">
+            <span>1: </span>
+          </div>
+        </div>
         <canvas id="touch" width="400" height="400"></canvas>
         <canvas id="bars" width="400" height="400"></canvas>
       </section>
-      Log:
-      <pre id="log" style="border: 1px solid #ccc;"></pre>
     </main>
   </body>
 </html>
