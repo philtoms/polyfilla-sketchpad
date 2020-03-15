@@ -1,0 +1,13 @@
+canvas {
+  width: 400px;
+  height: 400px;
+  border: solid black 1px;
+  position: absolute;
+  top: 30px;
+}
+#bars {
+  z-index: 1;
+}
+#touch {
+  z-index: 2;
+}
