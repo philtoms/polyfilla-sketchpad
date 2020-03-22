@@ -4,10 +4,40 @@ canvas {
   border: solid black 1px;
   position: absolute;
   top: 30px;
+  left: 0;
 }
 #bars {
   z-index: 1;
 }
 #touch {
   z-index: 2;
+}
+
+#compose,
+#intro {
+  display: none;
+}
+
+#compose.compose,
+#intro.intro {
+  display: block;
+}
+
+#channels::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+#channels {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
+  width: 400px;
+  overflow-x: scroll;
+}
+
+.channel {
+  width: 500px;
+}
+.channel span {
+  padding: 3px;
+  cursor: pointer;
 }
