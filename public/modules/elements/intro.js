@@ -4,13 +4,13 @@ import {
   useContext
 } from 'https://unpkg.com/hooked-elements?module';
 
-import tempo from './tempo.js';
+import calibrate from './calibrate.js';
 import synth from '../functions/synth.js';
 
 export default context => {
   define('#intro', {
     init() {
-      tempo(context);
+      calibrate(context);
       render(this);
     },
     onclick(e) {
