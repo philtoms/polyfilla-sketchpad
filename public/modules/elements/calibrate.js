@@ -4,7 +4,7 @@ import {
   useContext
 } from 'https://unpkg.com/hooked-elements?module';
 
-import calibrate from '../functions/calibrate-bpm.js';
+import { calibrate } from '../functions/tempo.js';
 
 export default context => {
   define('.calibrate', {

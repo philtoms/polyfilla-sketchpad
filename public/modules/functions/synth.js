@@ -15,8 +15,5 @@ export default () => {
   // synth = new Tone.AMSynth().toMaster();
   const synth = new Tone.Sampler(samples).toMaster();
   startContext(Tone.context);
-  try {
-    Object.keys(samples).forEach(s => synth.triggerAttackRelease(s));
-  } catch (e) {}
   return synth;
 };

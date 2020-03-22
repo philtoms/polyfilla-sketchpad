@@ -4,7 +4,7 @@ import {
   useContext
 } from 'https://unpkg.com/hooked-elements?module';
 
-import { channels } from '../melody/play-back.js';
+import { subscribe } from '../functions/tempo.js';
 
 export default context => {
   define('#channels', {
@@ -13,6 +13,9 @@ export default context => {
         (acc, el, channel) => ({ ...acc, [channel]: el }),
         {}
       );
+      subscribe(time => {
+        console.log({ time });
+      });
       render(this);
     },
     onclick(e) {

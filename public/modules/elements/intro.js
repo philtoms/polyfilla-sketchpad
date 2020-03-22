@@ -16,10 +16,7 @@ export default context => {
     onclick(e) {
       if (e.target.type === 'submit') {
         e.preventDefault();
-        if (!context.value.synth) {
-          context.value.synth = synth();
-        }
-        context.provide({ ...context.value, state: 'compose' });
+        context.provide({ ...context.value, state: 'compose', synth: synth() });
       }
     },
     render() {

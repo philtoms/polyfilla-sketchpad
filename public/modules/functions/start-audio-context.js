@@ -1,4 +1,4 @@
-export default context => {
+export default async context => {
   // this accomplishes the iOS specific requirement
   var buffer = context.createBuffer(1, 1, context.sampleRate);
   var source = context.createBufferSource();
@@ -10,6 +10,6 @@ export default context => {
 
   // resume the audio context
   if (context.resume) {
-    context.resume();
+    await context.resume();
   }
 };
