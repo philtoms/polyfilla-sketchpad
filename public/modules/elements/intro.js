@@ -5,6 +5,7 @@ import {
 } from 'https://unpkg.com/hooked-elements?module';
 
 import tempo from './tempo.js';
+import synth from '../functions/synth.js';
 
 export default context => {
   define('#intro', {
@@ -15,6 +16,9 @@ export default context => {
     onclick(e) {
       if (e.target.type === 'submit') {
         e.preventDefault();
+        if (!context.value.synth) {
+          context.value.synth = synth();
+        }
         context.provide({ ...context.value, state: 'compose' });
       }
     },

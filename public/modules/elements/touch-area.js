@@ -13,6 +13,7 @@ export default context => {
     init() {
       const el = this.element;
       this.ctx = el.getContext('2d');
+      // bind mouse events to touch
       this.mousemove = this.ontouchmove.bind(this);
       setInterval(fade(this.ctx, el.width, el.height), 30);
       render(this);
