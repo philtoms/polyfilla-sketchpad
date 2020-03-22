@@ -13,25 +13,31 @@ canvas {
   z-index: 2;
 }
 
-.hide {
+#compose,
+#intro {
   display: none;
 }
 
-#compose-channels::-webkit-scrollbar {
+#compose.compose,
+#intro.intro {
+  display: block;
+}
+
+#channels::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
 }
 
-#compose-channels {
+#channels {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
   width: 400px;
   overflow-x: scroll;
 }
 
-.compose-channel {
+.channel {
   width: 500px;
 }
-.compose-channel span {
+.channel span {
   padding: 3px;
   cursor: pointer;
 }
