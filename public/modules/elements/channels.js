@@ -22,12 +22,7 @@ export default context => {
     },
     render() {
       const { note, voicebox } = useContext(context);
-      if (!this.voicebox) {
-        this.voicebox = voicebox;
-        this.voicebox.subscribe((time, beat) => {
-          console.log({ time, beat });
-        });
-      }
+      this.voicebox = voicebox;
       if (note) {
         const { channel, name, idx } = note;
         const elChannel = this.channels[channel];
