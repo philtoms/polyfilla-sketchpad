@@ -15,8 +15,8 @@ const Clock = (ctx, interval, cb) => {
   const loop = () => {
     const source = Source(ctx, ctx.createBuffer(1, 1, ctx.sampleRate));
     source.onended = e => {
-      cb(e);
       loop();
+      cb(e);
     };
     source.start(0);
     source.stop(ctx.currentTime + interval);
