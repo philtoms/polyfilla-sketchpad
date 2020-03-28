@@ -18,14 +18,22 @@ export const register = (channel, name, touch, time) => {
   return event;
 };
 
-export const playback = (voicebox, startpoint, offset = 1, channel = 0) => {
+export const playback = (voicebox, startpoint, channel = 0) => {
   const channels = [].concat(channel);
   const startTime = events[startpoint].time;
-  for (let i = startpoint; i < events.length; i++) {
-    channels.forEach(channel => {
-      const { name, time } = events[i][channel];
-      voicebox.start(channel, name, time + offset - startTime);
-    });
-  }
-  voicebox.time = startTime;
+  voicebox.schedule(
+    startTime,
+    5,
+    events.slice(startpoint).reduce(
+      (acc, event) =>
+        acc.concat(
+          channels.map(channel => ({
+            time: event[channel].time,
+            spn: event[channel].name,
+            vid: channel
+          }))
+        ),
+      []
+    )
+  );
 };

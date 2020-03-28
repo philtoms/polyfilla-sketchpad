@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="/style.css" />
 
     <!-- <script src="https://unpkg.com/browse/tone@13.8.25/build/Tone.js"></script> -->
-    <!-- <script src="/Tone.js" defer></script> -->
+    <script src="/Tone.js" defer></script>
     <script src="https://unpkg.com/wicked-elements@2.0.2"></script>
     <script type="module" src="/index.js" defer></script>
   </head>
@@ -43,9 +43,13 @@
       </section>
       <section id="compose">
         <div id="channels">
-          <div class="channel" id="channel-0">
-            <span>1: </span>
-          </div>
+          <div class="channel" id="channel-0"></div>
+        </div>
+        <div id="metronome">
+          <span class="tick tick-0">*</span>
+          <span class="tick tick-1">*</span>
+          <span class="tick tick-2">*</span>
+          <span class="tick tick-3">*</span>
         </div>
         <canvas id="touch" width="400" height="400"></canvas>
         <canvas id="bars" width="400" height="400"></canvas>
