@@ -4,7 +4,7 @@ import {
   useContext
 } from 'https://unpkg.com/hooked-elements?module';
 
-import { subscribe } from '../functions/tempo.js';
+import { playback } from '../melody/play-back.js';
 
 export default context => {
   define('#channels', {
@@ -13,16 +13,21 @@ export default context => {
         (acc, el, channel) => ({ ...acc, [channel]: el }),
         {}
       );
-      subscribe(time => {
-        console.log({ time });
-      });
       render(this);
     },
     onclick(e) {
       e.preventDefault();
+      const idx = e.target.id.split('-').pop();
+      playback(this.voicebox, idx);
     },
     render() {
-      const { note } = useContext(context);
+      const { note, voicebox } = useContext(context);
+      if (!this.voicebox) {
+        this.voicebox = voicebox;
+        this.voicebox.subscribe((time, beat) => {
+          console.log({ time, beat });
+        });
+      }
       if (note) {
         const { channel, name, idx } = note;
         const elChannel = this.channels[channel];

@@ -23,7 +23,7 @@ export default context => {
       this.element.addEventListener('mousemove', this.mousemove, false);
       speeds.length = 0;
       const touch = this.copy((e.changedTouches || [e])[0], 'fill');
-      const note = play(this.synth, touch.channel, touch);
+      const note = play(this.voicebox, touch.channel, touch);
       draw(this.ctx, touch, touch);
       lastTouch = touch;
       context.provide({ ...context.value, note });
@@ -32,7 +32,7 @@ export default context => {
     ontouchmove(e) {
       e.preventDefault();
       const touch = this.copy((e.changedTouches || [e])[0]);
-      const note = play(this.synth, touch.channel, touch, lastTouch);
+      const note = play(this.voicebox, touch.channel, touch, lastTouch);
       draw(this.ctx, lastTouch, touch);
       lastTouch = touch;
       context.provide({ ...context.value, note });
@@ -42,8 +42,6 @@ export default context => {
       e.preventDefault();
       this.element.removeEventListener('mousemove', this.mousemove);
       stop();
-      // synth.triggerRelease(lastNote);
-      // synth.triggerAttackRelease(lastNote, 3);
     },
 
     onmousedown(e) {
@@ -56,7 +54,7 @@ export default context => {
     render() {
       const el = this.element;
       this.copy = copy(el.offsetLeft, el.offsetTop);
-      this.synth = useContext(context).synth;
+      this.voicebox = useContext(context).voicebox;
     }
   });
 };
