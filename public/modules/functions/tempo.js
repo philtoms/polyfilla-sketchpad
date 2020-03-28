@@ -1,19 +1,19 @@
-import startContext from './start-audio-context.js';
+// import startContext from '../voice/start-audio-context.js.js';
 
 let subscriptions = [];
-const loop = new Tone.Loop(time => {
-  subscriptions.forEach(cb => cb(time));
-}, '16n');
+// const loop = new Tone.Loop(time => {
+//   subscriptions.forEach(cb => cb(time));
+// }, '16n');
 
-Tone.Transport.bpm.value = 100;
+// Tone.Transport.bpm.value = 100;
 
 let running;
 export const start = async time => {
   if (!running) {
-    await startContext(Tone.context);
-    Tone.Transport.start();
+    // await startContext(Tone.context);
+    // Tone.Transport.start();
   }
-  loop.start();
+  // loop.start();
   running = true;
 };
 export const stop = time => {

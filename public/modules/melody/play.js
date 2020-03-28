@@ -5,7 +5,7 @@ export const speeds = [];
 import { select } from './notes.js';
 import { register } from './play-back.js';
 
-export const play = (synth, channel, touch, lastTouch) => {
+export const play = (voicebox, channel, touch, lastTouch) => {
   let speed = lastTouch
     ? parseInt((touch.pageY - lastTouch.pageY) * 100)
     : lastSpeed;
@@ -43,9 +43,9 @@ export const play = (synth, channel, touch, lastTouch) => {
   );
 
   if (name && name !== lastNote) {
-    const note = register(channel, name, touch);
+    const note = register(channel, name, touch, voicebox.time);
     log(`${name} ${note.time}`);
-    synth.triggerAttackRelease(name);
+    voicebox.start(0, name);
 
     lastNote = name;
     return note;

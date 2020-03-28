@@ -5,7 +5,6 @@ import {
 } from 'https://unpkg.com/hooked-elements?module';
 
 import calibrate from './calibrate.js';
-import synth from '../functions/synth.js';
 
 export default context => {
   define('#intro', {
@@ -16,11 +15,13 @@ export default context => {
     onclick(e) {
       if (e.target.type === 'submit') {
         e.preventDefault();
-        context.provide({ ...context.value, state: 'compose', synth: synth() });
+        this.voicebox.init();
+        context.provide({ ...context.value, state: 'compose' });
       }
     },
     render() {
-      const { state } = useContext(context);
+      const { state, voicebox } = useContext(context);
+      this.voicebox = voicebox;
       this.element.className = state;
     }
   });
