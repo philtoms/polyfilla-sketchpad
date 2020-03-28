@@ -12,8 +12,6 @@ const Source = (ctx, { buffer, playbackRate = 1 }) => {
 };
 
 const Clock = (ctx, interval, cb) => {
-  let ticks = 0;
-  let beats = 4;
   const loop = () => {
     const source = Source(ctx, ctx.createBuffer(1, 1, ctx.sampleRate));
     source.onended = e => {
@@ -87,7 +85,8 @@ export default (options = { tick: 60 / 80 }) => {
     }
     voicebox.time = 0;
     Clock(ctx, options.tick, e => {
-      subscriptions.forEach(cb => cb(voicebox.time, beats++ % 4));
+      const beat = beats++ % 4;
+      subscriptions.forEach(cb => cb(voicebox.time, beat));
     });
     return ctx;
   };
@@ -107,7 +106,15 @@ export default (options = { tick: 60 / 80 }) => {
     },
     subscribe: cb => {
       subscriptions.push(cb);
-      return voicebox;
+      return subscriptions.length - 1;
+    },
+    unsubscribe: sid => subscriptions.splice(sid, 1),
+    schedule: (startTime, beats, events) => {
+      const lead = options.tick * beats;
+      events.forEach(({ vid, spn, time }) =>
+        voicebox.start(vid, spn, time - startTime + lead)
+      );
+      voicebox.time = startTime - lead;
     }
   };
   return voicebox;
