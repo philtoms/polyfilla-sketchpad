@@ -1,4 +1,4 @@
-import { define, useContext } from 'https://unpkg.com/hooked-elements?module';
+const { define, useContext } = hookedElements;
 
 export default context => {
   define('#metronome', {

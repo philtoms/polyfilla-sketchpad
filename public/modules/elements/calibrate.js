@@ -1,10 +1,6 @@
-import {
-  define,
-  render,
-  useContext
-} from 'https://unpkg.com/hooked-elements?module';
-
 import { calibrate } from '../functions/tempo.js';
+
+const { define, render, useContext } = hookedElements;
 
 export default context => {
   define('.calibrate', {

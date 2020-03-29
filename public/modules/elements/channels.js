@@ -1,8 +1,4 @@
-import {
-  define,
-  render,
-  useContext
-} from 'https://unpkg.com/hooked-elements?module';
+const { define, render, useContext } = hookedElements;
 import { playback } from '../melody/play-back.js';
 
 export default context => {

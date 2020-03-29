@@ -25,6 +25,8 @@ const Clock = (ctx, interval, cb) => {
 };
 
 const Voice = (ctx, sampleData) => {
+  const naturals = [];
+  const samples = {};
   Object.entries(sampleData).map(
     ([spn, url]) =>
       new Promise(resolve => {
@@ -36,6 +38,7 @@ const Voice = (ctx, sampleData) => {
             request.response,
             buffer => {
               samples[spn] = { spn, buffer, playbackRate: 1 };
+              naturals.push(samples[spn]);
               resolve();
             },
             err => console.error(err)
@@ -45,11 +48,10 @@ const Voice = (ctx, sampleData) => {
       })
   );
 
-  const samples = {};
   return spn => {
     let sample = samples[spn];
     if (!sample) {
-      ({ sample } = Object.values(samples).reduce(
+      ({ sample } = naturals.reduce(
         (acc, src) => {
           const interval = fromSPN(spn).midi - fromSPN(src.spn).midi;
           if (interval >= 0 && interval < acc.interval) {
@@ -57,6 +59,7 @@ const Voice = (ctx, sampleData) => {
               interval,
               sample: {
                 ...src,
+                spn,
                 playbackRate: Math.pow(2, interval / 12)
               }
             };

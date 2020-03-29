@@ -1,11 +1,7 @@
-import {
-  define,
-  render,
-  useContext
-} from 'https://unpkg.com/hooked-elements?module';
+const { define, render, useContext } = hookedElements;
 
 import { copy, draw, fade } from '../functions/touch.js';
-import { play, stop, speeds } from '../melody/play.js';
+import { play, stop } from '../melody/play.js';
 
 let lastTouch;
 export default context => {
@@ -21,7 +17,6 @@ export default context => {
     ontouchstart(e) {
       e.preventDefault();
       this.element.addEventListener('mousemove', this.mousemove, false);
-      speeds.length = 0;
       const touch = this.copy((e.changedTouches || [e])[0], 'fill');
       const note = play(this.voicebox, touch.channel, touch);
       draw(this.ctx, touch, touch);
