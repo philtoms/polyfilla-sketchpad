@@ -27,8 +27,6 @@ export const register = (voicebox, channel, name, touch, time) => {
 export const playback = (voicebox, startpoint, channel = 0) => {
   const channels = [].concat(channel);
   voicebox.schedule(
-    events[startpoint].time,
-    5,
     events.slice(startpoint).reduce(
       (acc, event) =>
         acc.concat(

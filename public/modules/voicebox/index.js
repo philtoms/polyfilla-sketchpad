@@ -12,16 +12,10 @@ const Source = (ctx, { buffer, playbackRate = 1 }) => {
 };
 
 const Clock = (ctx, interval, cb) => {
-  const loop = () => {
-    const source = Source(ctx, ctx.createBuffer(1, 1, ctx.sampleRate));
-    source.onended = e => {
-      loop();
-      cb(e);
-    };
-    source.start(0);
-    source.stop(ctx.currentTime + interval);
-  };
-  loop();
+  const source = Source(ctx, ctx.createBuffer(1, 1, ctx.sampleRate));
+  source.onended = cb;
+  source.start(0);
+  source.stop(ctx.currentTime + interval);
 };
 
 const Voice = (ctx, sampleData) => {
@@ -73,12 +67,19 @@ const Voice = (ctx, sampleData) => {
   };
 };
 
-export default (options = { tick: 60 / 80 }) => {
+export default options => {
   const subscriptions = [];
-  let beats = 0;
-  let scheduled = [];
   const ctx = new AudioContext(options);
-  const init = () => {
+
+  let _tempo = 80 / 60;
+  let _beats = 4;
+  let _noteValue = 1 / 4;
+  let _ticks = 0;
+  let _scheduled = [];
+
+  const init = options => {
+    voicebox.tempo = options.tempo;
+    voicebox.signature = options.signature;
     try {
       const source = Source(ctx.createBuffer(1, 1, ctx.sampleRate));
       source.start(0);
@@ -88,10 +89,12 @@ export default (options = { tick: 60 / 80 }) => {
       ctx.resume();
     }
     voicebox.time = 0;
-    Clock(ctx, options.tick, e => {
-      const beat = beats++ % 4;
-      subscriptions.forEach(cb => cb(voicebox.time, beat));
-    });
+    const clock = () => {
+      Clock(ctx, _tempo, clock);
+      const tick = _ticks++ % _beats;
+      subscriptions.forEach(cb => cb(tick));
+    };
+    clock();
     return ctx;
   };
 
@@ -108,22 +111,40 @@ export default (options = { tick: 60 / 80 }) => {
     get time() {
       return ctx.currentTime - baseTime;
     },
-    set time(time) {
-      baseTime = ctx.currentTime - time;
+    set time(value) {
+      baseTime = ctx.currentTime - value;
+    },
+    get tempo() {
+      return _tempo * 60;
+    },
+    set tempo(value) {
+      _tempo = 60 / value;
+    },
+    get signature() {
+      return `${_beats}/${_noteValue}`;
+    },
+    set signature(value) {
+      _beats = parseInt(value.split('/')[0]);
+      _noteValue = 1 / value.split('/')[1];
     },
     subscribe: cb => {
       subscriptions.push(cb);
       return subscriptions.length - 1;
     },
     unsubscribe: sid => subscriptions.splice(sid, 1),
-    schedule: (startTime, beats, events) => {
-      const lead = options.tick * beats;
-      scheduled = events.map(({ vid, spn, time }) =>
-        voicebox.play(vid, spn, time - startTime + lead)
-      );
+    schedule: events => {
+      voicebox.cancel();
+      const startTime = events[0].time;
+      const lead = 0.75 * (_beats + 1);
+      _scheduled = events.map(({ vid, spn, time }, idx) => {
+        const next = idx
+          ? ((time - startTime) * _tempo) / 0.75
+          : time - startTime;
+        return voicebox.play(vid, spn, ((next + lead) * _tempo) / 0.75);
+      });
       voicebox.time = startTime - lead;
     },
-    cancel: () => scheduled.forEach(source => source.disconnect())
+    cancel: () => _scheduled.forEach(source => source.disconnect())
   };
   return voicebox;
 };

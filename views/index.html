@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Welcome to Glitch!</title>
+    <title>Polyfiller Sketchpad</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="A cool thing made with Glitch" />
@@ -23,30 +23,37 @@
   <body>
     <main>
       <section id="intro">
-        <h1>Starting with...</h1>
+        <h1>Polyfiller Sketchpad</h1>
         <form>
-          <select>
-            <option>3/4</option>
-            <option>4/4</option>
-          </select>
-          <div class="calibrate">
-            <input placeholder="bpm = 100" type="number" />
-            <input value="Calibrate" type="button" />
+          <div id="dynamics">
+            <select id="signature">
+              <option>4/4</option>
+              <option>3/4</option>
+            </select>
+            <input
+              type="range"
+              min="20"
+              max="200"
+              step="5"
+              value="80"
+              id="tempo"
+            />
+            <label for="tempo">80</label>
           </div>
           <div>
-            <button type="submit">Go compose!</button>
+            <button id="go" type="submit">Go compose!</button>
           </div>
         </form>
       </section>
       <section id="compose">
-        <div id="channels">
-          <div class="channel" id="channel-0"></div>
-        </div>
         <div id="metronome">
           <span class="tick tick-0">*</span>
           <span class="tick tick-1">*</span>
           <span class="tick tick-2">*</span>
           <span class="tick tick-3">*</span>
+        </div>
+        <div id="channels">
+          <div class="channel" id="channel-0"></div>
         </div>
         <canvas id="touch" width="400" height="400"></canvas>
         <canvas id="bars" width="400" height="400"></canvas>

@@ -48,7 +48,11 @@ export default context => {
 
     render() {
       const el = this.element;
-      this.copy = copy(el.offsetLeft, el.offsetTop);
+      const parent = el.offsetParent || { offsetLeft: 0, offsetTop: 0 };
+      this.copy = copy(
+        el.offsetLeft + parent.offsetLeft,
+        el.offsetTop + parent.offsetTop
+      );
       this.voicebox = useContext(context).voicebox;
     }
   });

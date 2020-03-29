@@ -1,7 +1,6 @@
 import log from './modules/utils/log.js';
 import intro from './modules/elements/intro.js';
 import compose from './modules/elements/compose.js';
-import metronome from './modules/elements/metronome.js';
 import voicebox from './modules/voicebox/index.js';
 
 const { createContext } = hookedElements;
@@ -23,7 +22,6 @@ const startup = () => {
     voicebox: voicebox().create(0, samples)
   });
   intro(context);
-  metronome(context);
   compose(context);
 };
 
