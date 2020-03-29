@@ -4,8 +4,13 @@ const emptyChannels = {
   2: []
 };
 
-const events = [];
-export const register = (channel, name, touch, time) => {
+let events = [];
+let lastTime = 0;
+export const register = (voicebox, channel, name, touch, time) => {
+  if (time < lastTime) {
+    voicebox.cancel();
+    events = events.filter(({ time: etime }) => etime < time);
+  }
   const idx = events.length;
   const event = {
     idx,
@@ -15,14 +20,14 @@ export const register = (channel, name, touch, time) => {
     touch
   };
   events.push({ ...emptyChannels, time, [channel]: event });
+  lastTime = time;
   return event;
 };
 
 export const playback = (voicebox, startpoint, channel = 0) => {
   const channels = [].concat(channel);
-  const startTime = events[startpoint].time;
   voicebox.schedule(
-    startTime,
+    events[startpoint].time,
     5,
     events.slice(startpoint).reduce(
       (acc, event) =>

@@ -27,8 +27,14 @@ export default context => {
         const { channel, name, idx } = note;
         const elChannel = this.channels[channel];
         const noteId = `${channel}-${idx}`;
-        elChannel.innerHTML =
-          elChannel.innerHTML + `<span id="${noteId}"> ${name} </span>`;
+        const event = `<span id="${noteId}" class="event"> ${name} </span>`;
+        let node = document.getElementById(noteId);
+        while (node) {
+          const next = node.nextSibling;
+          node.parentNode.removeChild(node);
+          node = next;
+        }
+        elChannel.innerHTML += event;
         const elNote = document.getElementById(noteId);
         this.element.scrollLeft = Math.max(0, elNote.offsetLeft - 375);
         elChannel.style.width = `${elChannel.clientWidth +

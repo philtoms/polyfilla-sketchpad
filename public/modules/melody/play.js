@@ -43,10 +43,8 @@ export const play = (voicebox, channel, touch, lastTouch) => {
   );
 
   if (name && name !== lastNote) {
-    const note = register(channel, name, touch, voicebox.time);
-    log(`${name} ${note.time}`);
-    voicebox.start(0, name);
-
+    const note = register(voicebox, channel, name, touch, voicebox.time);
+    voicebox.play(0, name);
     lastNote = name;
     return note;
   }

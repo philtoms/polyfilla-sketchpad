@@ -51,8 +51,8 @@ const Voice = (ctx, sampleData) => {
     if (!sample) {
       ({ sample } = Object.values(samples).reduce(
         (acc, src) => {
-          const interval = Math.abs(fromSPN(spn).midi - fromSPN(src.spn).midi);
-          if (interval < acc.interval) {
+          const interval = fromSPN(spn).midi - fromSPN(src.spn).midi;
+          if (interval >= 0 && interval < acc.interval) {
             acc = {
               interval,
               sample: {
@@ -73,6 +73,7 @@ const Voice = (ctx, sampleData) => {
 export default (options = { tick: 60 / 80 }) => {
   const subscriptions = [];
   let beats = 0;
+  let scheduled = [];
   const ctx = new AudioContext(options);
   const init = () => {
     try {
@@ -96,8 +97,11 @@ export default (options = { tick: 60 / 80 }) => {
   const voicebox = {
     init,
     create: (vid, data) => (voices[vid] = Voice(ctx, data)) && voicebox,
-    start: (vid, spn, time = 0) =>
-      Source(ctx, voices[vid](spn)).start(ctx.currentTime + time),
+    play: (vid, spn, time = 0) => {
+      const source = Source(ctx, voices[vid](spn));
+      source.start(ctx.currentTime + time);
+      return source;
+    },
     get time() {
       return ctx.currentTime - baseTime;
     },
@@ -111,11 +115,12 @@ export default (options = { tick: 60 / 80 }) => {
     unsubscribe: sid => subscriptions.splice(sid, 1),
     schedule: (startTime, beats, events) => {
       const lead = options.tick * beats;
-      events.forEach(({ vid, spn, time }) =>
-        voicebox.start(vid, spn, time - startTime + lead)
+      scheduled = events.map(({ vid, spn, time }) =>
+        voicebox.play(vid, spn, time - startTime + lead)
       );
       voicebox.time = startTime - lead;
-    }
+    },
+    cancel: () => scheduled.forEach(source => source.disconnect())
   };
   return voicebox;
 };
