@@ -137,10 +137,8 @@ export default options => {
       const startTime = events[0].time;
       const lead = 0.75 * (_beats + 1);
       _scheduled = events.map(({ vid, spn, time }, idx) => {
-        const next = idx
-          ? ((time - startTime) * _tempo) / 0.75
-          : time - startTime;
-        return voicebox.play(vid, spn, ((next + lead) * _tempo) / 0.75);
+        const next = idx ? ((time - startTime) * _tempo) / 0.75 : 0;
+        return voicebox.play(vid, spn, next + lead);
       });
       voicebox.time = startTime - lead;
     },

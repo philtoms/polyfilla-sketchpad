@@ -58,20 +58,30 @@ label {
   cursor: pointer;
 }
 
-#metronome .tick {
-  opacity: 0;
+@keyframes tick-0 {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
-#metronome.tick-0 .tick-0 {
-  opacity: 1;
+@keyframes tick-1 {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
-#metronome.tick-1 .tick-1 {
-  opacity: 1;
+
+#metronome.tick-0 {
+  animation: tick-0 0.2s;
+  animation-duration: 0.2s;
 }
-#metronome.tick-2 .tick-2 {
-  opacity: 1;
-}
-#metronome.tick-3 .tick-3 {
-  opacity: 1;
+#metronome.tick-1 {
+  animation: tick-1 0.2s;
+  animation-duration: 0.2s;
 }
 
 canvas {
