@@ -37,7 +37,7 @@ export default options => {
     init,
     create: (vid, data) => (voices[vid] = Voice(ctx, data)) && voicebox,
     get time() {
-      return ctx.currentTime - baseTime;
+      return Math.max(0, ctx.currentTime - baseTime);
     },
     set time(value) {
       baseTime = ctx.currentTime - value;
@@ -69,7 +69,7 @@ export default options => {
     schedule: events => {
       voicebox.cancel();
       const startTime = events[0].time;
-      const lead = 0.75 * (_beats + 1);
+      const lead = 0.75 * 2;
       _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
         const next = idx ? ((time - startTime) * _tempo) / 0.75 : 0;
         return [
@@ -78,12 +78,15 @@ export default options => {
         ];
       });
       voicebox.time = startTime - lead;
+      return events[0];
     },
-    cancel: () =>
+    cancel: time => {
       _scheduled.forEach(([s, d]) => {
         s.disconnect();
         d.onended = undefined;
-      })
+      });
+      voicebox.time = time;
+    }
   };
   return voicebox;
 };

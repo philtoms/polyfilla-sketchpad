@@ -7,9 +7,9 @@ const emptyChannels = {
   2: []
 };
 
-let events = [];
-let lastTime = 0;
-let lastEvent = {};
+let previousEvent = {};
+let lastEvent = { idx: -1 };
+let nextBeat = 0;
 
 export default context => {
   const { post } = client(context);
@@ -17,26 +17,28 @@ export default context => {
     const { voicebox } = context.value;
     const note = select(touch.pageX, touch.pageY);
 
-    if (note && note !== lastEvent.name) {
-      const event = register(channel, note, touch);
+    if (note && note !== previousEvent.name) {
+      previousEvent = register(channel, note, touch);
       voicebox.play(0, note);
-      return (lastEvent = event);
+      return previousEvent;
     }
   };
 
   const stop = touch => {
-    lastEvent.touch = touch;
-    lastEvent = {};
+    previousEvent.touch = touch;
+    previousEvent = {};
   };
 
   const register = (channel, name, touch) => {
-    const { voicebox } = context.value;
-    const time = voicebox.time;
-    if (time < lastTime) {
-      voicebox.cancel();
-      events = events.filter(({ time: etime }) => etime < time);
+    const { voicebox, data } = context.value;
+    let time = voicebox.time;
+    if (time < lastEvent.time) {
+      time = data[nextBeat].time;
+      voicebox.cancel(time);
+      const events = data.filter(({ time: etime }) => etime < time);
+      data.splice(0, data.length, ...events);
     }
-    const idx = events.length;
+    const idx = data.length;
     const event = {
       idx,
       channel,
@@ -44,24 +46,27 @@ export default context => {
       time,
       touch
     };
-    events.push({ ...emptyChannels, time, [channel]: event });
-    lastTime = time;
+    data.push({ ...emptyChannels, time, [channel]: event });
     post(event);
-    return event;
+    return (lastEvent = event);
   };
 
   const playback = (startpoint, channel = 0) => {
-    const { voicebox, draw } = context.value;
+    const { voicebox, draw, data } = context.value;
     const channels = [].concat(channel);
+    nextBeat = startpoint;
     voicebox.schedule(
-      events.slice(startpoint).reduce(
+      data.slice(startpoint).reduce(
         (acc, event) =>
           acc.concat(
             channels.map(channel => ({
               time: event[channel].time,
               spn: event[channel].name,
               vid: channel,
-              cb: () => draw(event[channel].touch)
+              cb: () => {
+                nextBeat = event[channel].idx + 1;
+                draw(event[channel].touch);
+              }
             }))
           ),
         []
@@ -72,7 +77,6 @@ export default context => {
   return {
     play,
     stop,
-    playback,
-    register
+    playback
   };
 };

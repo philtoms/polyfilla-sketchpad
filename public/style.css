@@ -58,7 +58,8 @@ label {
 }
 
 .channel {
-  width: 105%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .channel span {
   padding: 3px;

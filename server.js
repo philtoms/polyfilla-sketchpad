@@ -3,7 +3,7 @@ const express = require('express');
 const fs = require('fs');
 const template = fs.readFileSync('./views/index.html', 'utf-8');
 
-const opusList = {};
+let opusList = {};
 
 const app = express();
 app.use(express.json());
@@ -16,23 +16,29 @@ app.get('/:title?', (req, res) => {
     res.setHeader('location', `/opus-${Object.keys(opusList).length + 1}`);
     return res.sendStatus(302);
   }
+  // opusList = {};
   res.send(template.replace('${title}', title));
 });
+
+const emptyChannels = {
+  0: [],
+  1: [],
+  2: []
+};
 
 app.post('/:title/data/:idx', (req, res) => {
   const { title, idx } = req.params;
   const opus = opusList[title] || [];
-  const data = req.body;
-  if (Array.isArray(data)) {
-    opus.splice(idx, data.length, ...data);
-  } else if (idx === opus.length) {
-    opus.push(data);
-  } else {
-    opus.length = idx - 1;
-    opus.push(data);
-  }
+  const event = req.body;
+  opus.length = idx;
+  opus[idx] = {
+    ...emptyChannels,
+    ...opus[idx],
+    time: (opus[idx] || event).time,
+    [event.channel]: event
+  };
   opusList[title] = opus;
-  res.json({ title, idx, length: data.length || 1 });
+  res.json({ title, idx });
 });
 
 app.get('/:title/data', (req, res) => {

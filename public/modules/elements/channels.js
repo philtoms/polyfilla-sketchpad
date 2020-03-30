@@ -15,15 +15,14 @@ export default context => {
     onclick(e) {
       e.preventDefault();
       const startpoint = e.target.id.split('-').pop();
-      playback(startpoint, 0);
+      playback(parseInt(startpoint), 0);
     },
     render() {
-      const { note, voicebox } = useContext(context);
+      const { note, voicebox, data } = useContext(context);
       this.voicebox = voicebox;
       if (note && note !== this.note) {
         this.note = note;
         const { channel, name, idx } = note;
-        const elChannel = this.channels[channel];
         const noteId = `${channel}-${idx}`;
         const event = `<span id="${noteId}" class="event"> ${name} </span>`;
         let node = document.getElementById(noteId);
@@ -32,12 +31,18 @@ export default context => {
           node.parentNode.removeChild(node);
           node = next;
         }
-        elChannel.innerHTML += event;
+        this.channels[channel].innerHTML += event;
         const elNote = document.getElementById(noteId);
         this.element.scrollLeft = Math.max(0, elNote.offsetLeft - 375);
-        elChannel.style.width = `${elChannel.clientWidth +
-          elNote.clientWidth +
-          30}px`;
+      }
+      // todo apply all channels
+      if (data && !this.channels[0].innerHTML) {
+        const channel = 0;
+        this.channels[channel].innerHTML = data.reduce((acc, data) => {
+          const { name, idx } = data[channel];
+          const noteId = `${channel}-${idx}`;
+          return `${acc}<span id="${noteId}" class="event"> ${name} </span>`;
+        }, '');
       }
     }
   });
