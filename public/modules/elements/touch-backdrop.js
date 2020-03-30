@@ -1,6 +1,6 @@
-const { define, render, useContext } = hookedElements;
-
 import { basenotes } from '../melody/notes.js';
+
+const { define, render, useContext } = hookedElements;
 
 export default context => {
   define('#bars', {
@@ -26,9 +26,6 @@ export default context => {
       ctx.lineWidth = width * 0.5;
       ctx.strokeStyle = `rgba(0,20,00,0.2)`;
       ctx.stroke();
-      // document
-      //   .getElementById('compose-channels')
-      //   .addEventListener('mousedown', replaceReplay);
     }
   });
 };

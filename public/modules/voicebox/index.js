@@ -1,75 +1,10 @@
-import { fromSPN } from './notes.js';
-
-// for cross browser
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-
-const Source = (ctx, { buffer, playbackRate = 1 }) => {
-  const source = ctx.createBufferSource();
-  source.buffer = buffer;
-  source.playbackRate.value = playbackRate;
-  source.connect(ctx.destination);
-  return source;
-};
-
-const Clock = (ctx, interval, cb) => {
-  const source = Source(ctx, ctx.createBuffer(1, 1, ctx.sampleRate));
-  source.onended = cb;
-  source.start(0);
-  source.stop(ctx.currentTime + interval);
-};
-
-const Voice = (ctx, sampleData) => {
-  const naturals = [];
-  const samples = {};
-  Object.entries(sampleData).map(
-    ([spn, url]) =>
-      new Promise(resolve => {
-        const request = new XMLHttpRequest();
-        request.open('GET', url, true);
-        request.responseType = 'arraybuffer';
-        request.onload = () => {
-          ctx.decodeAudioData(
-            request.response,
-            buffer => {
-              samples[spn] = { spn, buffer, playbackRate: 1 };
-              naturals.push(samples[spn]);
-              resolve();
-            },
-            err => console.error(err)
-          );
-        };
-        request.send();
-      })
-  );
-
-  return spn => {
-    let sample = samples[spn];
-    if (!sample) {
-      ({ sample } = naturals.reduce(
-        (acc, src) => {
-          const interval = fromSPN(spn).midi - fromSPN(src.spn).midi;
-          if (interval >= 0 && interval < acc.interval) {
-            acc = {
-              interval,
-              sample: {
-                ...src,
-                spn,
-                playbackRate: Math.pow(2, interval / 12)
-              }
-            };
-          }
-          return acc;
-        },
-        { interval: Number.MAX_SAFE_INTEGER }
-      ));
-    }
-    return (samples[spn] = sample);
-  };
-};
+import Voice from './voice.js';
+import Source from './source.js';
 
 export default options => {
   const subscriptions = [];
-  const ctx = new AudioContext(options);
+  const ctx = new (window.AudioContext || window.webkitAudioContext)(options);
+  const source = Source(ctx);
 
   let _tempo = 80 / 60;
   let _beats = 4;
@@ -81,16 +16,14 @@ export default options => {
     voicebox.tempo = options.tempo;
     voicebox.signature = options.signature;
     try {
-      const source = Source(ctx.createBuffer(1, 1, ctx.sampleRate));
-      source.start(0);
-      source.connect(ctx.destination);
+      source();
     } catch (e) {}
     if (ctx.resume) {
       ctx.resume();
     }
     voicebox.time = 0;
     const clock = () => {
-      Clock(ctx, _tempo, clock);
+      source({ cb: clock, stop: _tempo });
       const tick = _ticks++ % _beats;
       subscriptions.forEach(cb => cb(tick));
     };
@@ -103,11 +36,6 @@ export default options => {
   const voicebox = {
     init,
     create: (vid, data) => (voices[vid] = Voice(ctx, data)) && voicebox,
-    play: (vid, spn, time = 0) => {
-      const source = Source(ctx, voices[vid](spn));
-      source.start(ctx.currentTime + time);
-      return source;
-    },
     get time() {
       return ctx.currentTime - baseTime;
     },
@@ -132,17 +60,30 @@ export default options => {
       return subscriptions.length - 1;
     },
     unsubscribe: sid => subscriptions.splice(sid, 1),
+    play: (vid, spn, time, cb) =>
+      source({
+        ...voices[vid](spn),
+        start: time,
+        cb
+      }),
     schedule: events => {
       voicebox.cancel();
       const startTime = events[0].time;
       const lead = 0.75 * (_beats + 1);
-      _scheduled = events.map(({ vid, spn, time }, idx) => {
+      _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
         const next = idx ? ((time - startTime) * _tempo) / 0.75 : 0;
-        return voicebox.play(vid, spn, next + lead);
+        return [
+          voicebox.play(vid, spn, next + lead),
+          source({ cb, stop: next + lead })
+        ];
       });
       voicebox.time = startTime - lead;
     },
-    cancel: () => _scheduled.forEach(source => source.disconnect())
+    cancel: () =>
+      _scheduled.forEach(([s, d]) => {
+        s.disconnect();
+        d.onended = undefined;
+      })
   };
   return voicebox;
 };

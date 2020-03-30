@@ -8,8 +8,7 @@ export default context => {
         this.voicebox = voicebox;
         this.voicebox.subscribe(beat => {
           this.element.className = `tick-${beat % 2}`;
-          // this.element.style.opacity = 1;
-          // console.log({ time, beat });
+          // console.log(beat, this.voicebox.time);
         });
       }
     }

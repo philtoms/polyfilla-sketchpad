@@ -1,9 +1,9 @@
-const { define, render, useContext } = hookedElements;
-
 import channels from './channels.js';
 import touch from './touch-area.js';
 import backdrop from './touch-backdrop.js';
 import metronome from './metronome.js';
+
+const { define, render, useContext } = hookedElements;
 
 export default context => {
   define('#compose', {

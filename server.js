@@ -1,36 +1,58 @@
 // server.js
-// where your node app starts
-
-// we've started you off with Express (https://expressjs.com/)
-// but feel free to use whatever libraries or frameworks you'd like through `package.json`.
 const express = require('express');
+const fs = require('fs');
+const template = fs.readFileSync('./views/index.html', 'utf-8');
+
+const opusList = {};
+
 const app = express();
-
-// our default array of dreams
-const dreams = [
-  'Find and count some sheep',
-  'Climb a really tall mountain',
-  'Wash the dishes',
-  'go to gym'
-];
-
-// make all the files in 'public' available
-// https://expressjs.com/en/starter/static-files.html
+app.use(express.json());
 app.use(express.static('assets'));
 app.use('/', express.static('public'));
 
-// https://expressjs.com/en/starter/basic-routing.html
-app.get('/', (request, response) => {
-  response.sendFile(__dirname + '/views/index.html');
+app.get('/:title?', (req, res) => {
+  const { title } = req.params;
+  if (!title) {
+    res.setHeader('location', `/opus-${Object.keys(opusList).length + 1}`);
+    return res.sendStatus(302);
+  }
+  res.send(template.replace('${title}', title));
 });
 
-// send the default array of dreams to the webpage
-app.get('/dreams', (request, response) => {
-  // express helps us take JS objects and send them as JSON
-  response.json(dreams);
+app.post('/:title/data/:idx', (req, res) => {
+  const { title, idx } = req.params;
+  const opus = opusList[title] || [];
+  const data = req.body;
+  if (Array.isArray(data)) {
+    opus.splice(idx, data.length, ...data);
+  } else if (idx === opus.length) {
+    opus.push(data);
+  } else {
+    opus.length = idx - 1;
+    opus.push(data);
+  }
+  opusList[title] = opus;
+  res.json({ title, idx, length: data.length || 1 });
 });
 
-// listen for requests :)
+app.get('/:title/data', (req, res) => {
+  const { title } = req.params;
+  const opus = opusList[title] || [];
+  res.json(opus);
+});
+
+app.get('/:title/data/:idx', (req, res) => {
+  const { title, idx } = req.params;
+  const opus = opusList[title] || [];
+  res.json(opus[idx]);
+});
+
+app.post('/:title/data', (req, res) => {
+  const { title } = req.params;
+  opusList[title] = req.body;
+  res.json({ title });
+});
+
 const listener = app.listen(process.env.PORT || 8080, () => {
   console.log('Your app is listening on port ' + listener.address().port);
 });

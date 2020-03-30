@@ -12,6 +12,13 @@ label {
   padding: 0;
 }
 
+#title {
+  text-align: center;
+  font-family: inherit;
+  font-size: 20px;
+  border: none;
+}
+
 #dynamics {
   display: flex;
   justify-content: center;

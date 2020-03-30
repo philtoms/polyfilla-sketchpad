@@ -1,9 +1,12 @@
 import merge from '../utils/merge.js';
+import client from '../utils/client.js';
 
 const { define, render, useContext } = hookedElements;
 
 export default context => {
   const provide = state => context.provide(merge(context.value, state));
+  const { get } = client(context);
+
   define('#tempo', {
     oninput({ target: { value } }) {
       this.element.nextElementSibling.innerText = value;
@@ -12,20 +15,50 @@ export default context => {
           tempo: value
         }
       });
-      context.value.voicebox.tempo = value;
     },
-    render() {}
+    render() {
+      const { voicebox, dynamics } = useContext(context);
+      if (dynamics) {
+        voicebox.tempo = dynamics.tempo;
+      }
+    }
   });
   define('#signature', {
     oninput({ target: { value } }) {
+      this.signature = value;
       provide({
         dynamics: {
           signature: value
         }
       });
-      context.value.voicebox.signature = value;
     },
-    render() {}
+    render() {
+      const { voicebox, dynamics } = useContext(context);
+      if (dynamics) {
+        voicebox.signature = dynamics.signature;
+      }
+    }
+  });
+  define('#title', {
+    init() {
+      const title = this.element.value;
+      provide({ title });
+      render(this);
+    },
+    onchange({ target: { value } }) {
+      provide({
+        title: value
+      });
+    },
+    render() {
+      const { title } = useContext(context);
+      if (!this.title) {
+        this.title = title;
+        get();
+      } else if (this.title !== title) {
+        window.location.href = window.location.href.replace(this.title, title);
+      }
+    }
   });
   define('#intro', {
     onclick(e) {

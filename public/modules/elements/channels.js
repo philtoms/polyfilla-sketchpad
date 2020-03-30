@@ -1,7 +1,9 @@
+import player from '../melody/player.js';
+
 const { define, render, useContext } = hookedElements;
-import { playback } from '../melody/play-back.js';
 
 export default context => {
+  const { playback } = player(context);
   define('#channels', {
     init() {
       this.channels = Array.from(this.element.children).reduce(
@@ -13,7 +15,7 @@ export default context => {
     onclick(e) {
       e.preventDefault();
       const startpoint = e.target.id.split('-').pop();
-      playback(this.voicebox, startpoint);
+      playback(startpoint, 0);
     },
     render() {
       const { note, voicebox } = useContext(context);
