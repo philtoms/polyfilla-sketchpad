@@ -55,6 +55,11 @@ export default options => {
       _beats = parseInt(value.split('/')[0]);
       _noteValue = 1 / value.split('/')[1];
     },
+    nextTime: lastTime => {
+      const time = voicebox.time;
+      if (time > lastTime + _tempo * _beats) voicebox.time = lastTime + _tempo;
+      return voicebox.time;
+    },
     subscribe: cb => {
       subscriptions.push(cb);
       return subscriptions.length - 1;

@@ -8,7 +8,7 @@ const emptyChannels = {
 };
 
 let previousEvent = {};
-let lastEvent = { idx: -1 };
+let lastTime = 0;
 let nextBeat = 0;
 
 export default context => {
@@ -31,8 +31,11 @@ export default context => {
 
   const register = (channel, name, touch) => {
     const { voicebox, data } = context.value;
-    let time = voicebox.time;
-    if (time < lastEvent.time) {
+    if (!lastTime) {
+      lastTime = data.length ? data[data.length - 1].time : 0;
+    }
+    let time = voicebox.nextTime(lastTime);
+    if (time < lastTime) {
       time = data[nextBeat].time;
       voicebox.cancel(time);
       const events = data.filter(({ time: etime }) => etime < time);
@@ -48,7 +51,8 @@ export default context => {
     };
     data.push({ ...emptyChannels, time, [channel]: event });
     post(event);
-    return (lastEvent = event);
+    lastTime = time;
+    return event;
   };
 
   const playback = (startpoint, channel = 0) => {
