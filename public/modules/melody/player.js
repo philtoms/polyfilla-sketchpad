@@ -51,13 +51,13 @@ export default context => {
     };
     data.push({ ...emptyChannels, time, [channel]: event });
     quantize(idx);
-    post(data[idx][channel]);
+    post(data[idx][channel], idx);
     lastTime = time;
     return event;
   };
 
   const playback = (startpoint, channel = 0) => {
-    const { voicebox, draw, data } = context.value;
+    const { voicebox, data, draw = () => {} } = context.value;
     const channels = [].concat(channel);
     nextBeat = startpoint;
     voicebox.schedule(

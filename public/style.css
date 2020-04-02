@@ -121,6 +121,7 @@ canvas {
 }
 
 #sketches .events {
+  cursor: pointer;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

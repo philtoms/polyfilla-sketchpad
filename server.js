@@ -20,13 +20,13 @@ app.post('/data', (req, res) => {
   res.json({ count: Object.keys(sketchList).length });
 });
 
-app.get('/list?', (req, res) => {
+app.get('/list', (req, res) => {
   res.send(
     listTemplate.replace(
       '${sketches}',
       `<ul>${Object.entries(sketchList).reduce(
-        (acc, [title, events]) =>
-          `${acc}<li>${`<a href="/${title}">${title}</a><div class="events">${events
+        (acc, [title, sketch]) =>
+          `${acc}<li>${`<a href="/${title}">${title}</a><div class="events">${sketch.events
             .slice(0, 6)
             .reduce(
               (acc, event) => `${acc} ${event[0].name}`,
@@ -54,15 +54,36 @@ const emptyChannels = {
   2: []
 };
 
+const emptySketch = () => ({
+  score: {
+    signature: '4/4',
+    tempo: 120
+  },
+  events: []
+});
+
+app.post('/:title/data/score', (req, res) => {
+  const { title } = req.params;
+  sketchList[title].score = req.body;
+  res.json({ title });
+});
+
+app.get('/:title/data/clear', (req, res) => {
+  const { title } = req.params;
+  sketchList[title] = [];
+  res.json([]);
+});
+
 app.post('/:title/data/:idx', (req, res) => {
   const { title, idx } = req.params;
-  const sketch = sketchList[title] || [];
+  const sketch = sketchList[title] || emptySketch();
+  const events = sketch.events;
   const event = req.body;
-  sketch.length = idx;
-  sketch[idx] = {
+  events.length = idx;
+  events[idx] = {
     ...emptyChannels,
-    ...sketch[idx],
-    time: (sketch[idx] || event).time,
+    ...events[idx],
+    time: (events[idx] || event).time,
     [event.channel]: event
   };
   sketchList[title] = sketch;
@@ -71,20 +92,8 @@ app.post('/:title/data/:idx', (req, res) => {
 
 app.get('/:title/data', (req, res) => {
   const { title } = req.params;
-  const sketch = sketchList[title] || [];
+  const sketch = sketchList[title] || emptySketch();
   res.json(sketch);
-});
-
-app.get('/:title/data/:idx', (req, res) => {
-  const { title, idx } = req.params;
-  const sketch = sketchList[title] || [];
-  res.json(sketch[idx]);
-});
-
-app.get('/:title/data/clear', (req, res) => {
-  const { title } = req.params;
-  sketchList[title] = [];
-  res.json([]);
 });
 
 app.post('/:title/data', (req, res) => {

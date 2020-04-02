@@ -14,7 +14,8 @@
 const log = require.I(require(1));
 const intro = require.I(require(2));
 const compose = require.I(require(6));
-const voicebox = require.I(require(15));
+const list = require.I(require(15));
+const voicebox = require.I(require(16));
 
 const { createContext } = hookedElements;
 const assets = 'https://cdn.glitch.com/ee40e085-f63b-4369-9a4a-dc97bb39e335%2F';
@@ -37,6 +38,7 @@ const startup = () => {
   });
   intro(context);
   compose(context);
+  list(context);
 };
 
 document.addEventListener('DOMContentLoaded', startup);
@@ -59,38 +61,37 @@ const client = require.I(require(5));
 const { define, render, useContext } = hookedElements;
 
 require.E(exports).default = context => {
-  const provide = state => context.provide(merge(context.value, state));
-  const { get } = client(context);
+  const { get, post } = client(context);
+
+  const provide = state => {
+    context.provide(merge(context.value, state));
+    return context.value;
+  };
 
   define('#tempo', {
     oninput({ target: { value } }) {
-      this.element.nextElementSibling.innerText = value;
-      provide({
-        dynamics: {
-          tempo: value
-        }
-      });
+      const { score, state } = provide({ score: { tempo: value } });
+      if (state === 'intro') post(score, 'score');
     },
     render() {
-      const { voicebox, dynamics } = useContext(context);
-      if (dynamics && dynamics.tempo) {
-        voicebox.tempo = dynamics.tempo;
+      const { voicebox, score } = useContext(context);
+      if (score && score.tempo) {
+        voicebox.tempo = score.tempo;
+        this.element.value = score.tempo;
+        this.element.nextElementSibling.innerText = score.tempo;
       }
     }
   });
   define('#signature', {
     oninput({ target: { value } }) {
-      this.signature = value;
-      provide({
-        dynamics: {
-          signature: value
-        }
-      });
+      const { score, state } = provide({ score: { signature: value } });
+      if (state === 'intro') post(score, 'score');
     },
     render() {
-      const { voicebox, dynamics } = useContext(context);
-      if (dynamics && dynamics.signature) {
-        voicebox.signature = dynamics.signature;
+      const { voicebox, score } = useContext(context);
+      if (score && score.signature) {
+        voicebox.signature = score.signature;
+        this.element.value = score.signature;
       }
     }
   });
@@ -115,32 +116,30 @@ require.E(exports).default = context => {
     }
   });
   define('#intro', {
+    init() {
+      render(this);
+      get().then(data => {
+        const { score = context.value.score, events = [] } = data;
+        provide({
+          score,
+          data: events
+        });
+      });
+    },
     onclick(e) {
       if (e.target.type === 'submit') {
         e.preventDefault();
-        this.voicebox.init(
-          merge(
-            {
-              tempo: 120,
-              signature: '4/4'
-            },
-            context.value.dynamics
-          )
-        );
-        get().then(data => {
-          const quantizeData = quantize(this.voicebox.signature, data);
-          provide({
-            state: 'compose',
-            quantize: quantizeData,
-            data: quantizeData(0)
-          });
+        const { score, voicebox, data } = context.value;
+        voicebox.init(score);
+        provide({
+          state: 'compose',
+          quantize: quantize(voicebox.signature, data)
         });
         e.target.className = 'compose';
       }
     },
     render() {
-      const { state, voicebox } = useContext(context);
-      this.voicebox = voicebox;
+      const { state } = useContext(context);
       this.element.className = state;
     }
   });
@@ -275,8 +274,8 @@ require.E(exports).default = merge;
 // modules/utils/client.js
 'use strict';
 require.E(exports).default = context => ({
-  post: data =>
-    fetch(`${context.value.title}/data/${data.idx}`, {
+  post: (data, path = '') =>
+    fetch(`${context.value.title}/data/${path}`, {
       headers: {
         'Content-type': 'application/json'
       },
@@ -433,13 +432,13 @@ require.E(exports).default = context => {
     };
     data.push({ ...emptyChannels, time, [channel]: event });
     quantize(idx);
-    post(data[idx][channel]);
+    post(data[idx][channel], idx);
     lastTime = time;
     return event;
   };
 
   const playback = (startpoint, channel = 0) => {
-    const { voicebox, draw, data } = context.value;
+    const { voicebox, data, draw = () => {} } = context.value;
     const channels = [].concat(channel);
     nextBeat = startpoint;
     voicebox.schedule(
@@ -683,10 +682,40 @@ require.E(exports).default = context => {
 };
 
 },function (global, require, module, exports) {
+// modules/elements/list.js
+'use strict';
+const player = require.I(require(8));
+const client = require.I(require(5));
+
+const { define, useContext } = hookedElements;
+
+require.E(exports).default = context => {
+  const { playback } = player(context);
+  const { get } = client(context);
+
+  define('#list', {
+    onclick(e) {
+      if (e.target.className === 'events') {
+        context.value.title = e.target.previousSibling.innerText;
+        get().then(data => {
+          this.voicebox.init(data.score);
+          context.value.data = data.events;
+          playback(0, 0);
+        });
+      }
+    },
+    render() {
+      const { voicebox } = useContext(context);
+      this.voicebox = voicebox;
+    }
+  });
+};
+
+},function (global, require, module, exports) {
 // modules/voicebox/index.js
 'use strict';
-const Voice = require.I(require(16));
-const Source = require.I(require(18));
+const Voice = require.I(require(17));
+const Source = require.I(require(19));
 
 require.E(exports).default = options => {
   const subscriptions = [];
@@ -694,6 +723,7 @@ require.E(exports).default = options => {
   const source = Source(ctx);
 
   let _tempo = 60 / 120;
+  let _scoreTempo = _tempo;
   let _beats = 4;
   let _noteValue = 1 / 4;
   let _ticks = 0;
@@ -701,6 +731,7 @@ require.E(exports).default = options => {
 
   const init = options => {
     voicebox.tempo = options.tempo;
+    _scoreTempo = _tempo;
     voicebox.signature = options.signature;
     try {
       source();
@@ -763,7 +794,7 @@ require.E(exports).default = options => {
       const startTime = events[0].time;
       const lead = _tempo * 2;
       _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
-        const next = idx ? ((time - startTime) * _tempo) / _tempo : 0;
+        const next = idx ? ((time - startTime) * _tempo) / _scoreTempo : 0;
         return [
           voicebox.play(vid, spn, next + lead),
           source({ cb, stop: next + lead })
@@ -786,7 +817,7 @@ require.E(exports).default = options => {
 },function (global, require, module, exports) {
 // modules/voicebox/voice.js
 'use strict';
-const { fromSPN } = require(17);
+const { fromSPN } = require(18);
 
 require.E(exports).default = (ctx, sampleData) => {
   const naturals = [];

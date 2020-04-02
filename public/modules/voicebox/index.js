@@ -7,6 +7,7 @@ export default options => {
   const source = Source(ctx);
 
   let _tempo = 60 / 120;
+  let _scoreTempo = _tempo;
   let _beats = 4;
   let _noteValue = 1 / 4;
   let _ticks = 0;
@@ -14,6 +15,7 @@ export default options => {
 
   const init = options => {
     voicebox.tempo = options.tempo;
+    _scoreTempo = _tempo;
     voicebox.signature = options.signature;
     try {
       source();
@@ -74,9 +76,9 @@ export default options => {
     schedule: events => {
       voicebox.cancel();
       const startTime = events[0].time;
-      const lead = _tempo * 2;
+      const lead = _scoreTempo * 2;
       _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
-        const next = idx ? ((time - startTime) * _tempo) / _tempo : 0;
+        const next = idx ? ((time - startTime) * _tempo) / _scoreTempo : 0;
         return [
           voicebox.play(vid, spn, next + lead),
           source({ cb, stop: next + lead })

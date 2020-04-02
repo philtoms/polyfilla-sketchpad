@@ -1,6 +1,6 @@
 export default context => ({
-  post: data =>
-    fetch(`${context.value.title}/data/${data.idx}`, {
+  post: (data, path = '') =>
+    fetch(`${context.value.title}/data/${path}`, {
       headers: {
         'Content-type': 'application/json'
       },

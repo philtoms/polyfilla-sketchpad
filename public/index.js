@@ -1,6 +1,7 @@
 import log from './modules/utils/log.js';
 import intro from './modules/elements/intro.js';
 import compose from './modules/elements/compose.js';
+import list from './modules/elements/list.js';
 import voicebox from './modules/voicebox/index.js';
 
 const { createContext } = hookedElements;
@@ -24,6 +25,7 @@ const startup = () => {
   });
   intro(context);
   compose(context);
+  list(context);
 };
 
 document.addEventListener('DOMContentLoaded', startup);

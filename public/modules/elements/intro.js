@@ -5,38 +5,37 @@ import client from '../utils/client.js';
 const { define, render, useContext } = hookedElements;
 
 export default context => {
-  const provide = state => context.provide(merge(context.value, state));
-  const { get } = client(context);
+  const { get, post } = client(context);
+
+  const provide = state => {
+    context.provide(merge(context.value, state));
+    return context.value;
+  };
 
   define('#tempo', {
     oninput({ target: { value } }) {
-      this.element.nextElementSibling.innerText = value;
-      provide({
-        dynamics: {
-          tempo: value
-        }
-      });
+      const { score, state } = provide({ score: { tempo: value } });
+      if (state === 'intro') post(score, 'score');
     },
     render() {
-      const { voicebox, dynamics } = useContext(context);
-      if (dynamics && dynamics.tempo) {
-        voicebox.tempo = dynamics.tempo;
+      const { voicebox, score } = useContext(context);
+      if (score && score.tempo) {
+        voicebox.tempo = score.tempo;
+        this.element.value = score.tempo;
+        this.element.nextElementSibling.innerText = score.tempo;
       }
     }
   });
   define('#signature', {
     oninput({ target: { value } }) {
-      this.signature = value;
-      provide({
-        dynamics: {
-          signature: value
-        }
-      });
+      const { score, state } = provide({ score: { signature: value } });
+      if (state === 'intro') post(score, 'score');
     },
     render() {
-      const { voicebox, dynamics } = useContext(context);
-      if (dynamics && dynamics.signature) {
-        voicebox.signature = dynamics.signature;
+      const { voicebox, score } = useContext(context);
+      if (score && score.signature) {
+        voicebox.signature = score.signature;
+        this.element.value = score.signature;
       }
     }
   });
@@ -61,32 +60,30 @@ export default context => {
     }
   });
   define('#intro', {
+    init() {
+      render(this);
+      get().then(data => {
+        const { score = context.value.score, events = [] } = data;
+        provide({
+          score,
+          data: events
+        });
+      });
+    },
     onclick(e) {
       if (e.target.type === 'submit') {
         e.preventDefault();
-        this.voicebox.init(
-          merge(
-            {
-              tempo: 120,
-              signature: '4/4'
-            },
-            context.value.dynamics
-          )
-        );
-        get().then(data => {
-          const quantizeData = quantize(this.voicebox.signature, data);
-          provide({
-            state: 'compose',
-            quantize: quantizeData,
-            data: quantizeData(0)
-          });
+        const { score, voicebox, data } = context.value;
+        voicebox.init(score);
+        provide({
+          state: 'compose',
+          quantize: quantize(voicebox.signature, data)
         });
         e.target.className = 'compose';
       }
     },
     render() {
-      const { state, voicebox } = useContext(context);
-      this.voicebox = voicebox;
+      const { state } = useContext(context);
       this.element.className = state;
     }
   });
