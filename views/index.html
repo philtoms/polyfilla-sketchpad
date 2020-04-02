@@ -34,19 +34,23 @@
             <input
               type="range"
               min="20"
-              max="200"
+              max="240"
               step="5"
-              value="80"
+              value="120"
               id="tempo"
             />
-            <label for="tempo">80</label>
+            <label for="tempo">120</label>
           </div>
-          <div>
-            <button id="go" type="submit">Go compose!</button>
+          <div id="go">
+            <button type="submit">Go compose!</button>
           </div>
         </form>
       </section>
       <section id="compose">
+        <!-- <div id="controls">
+          <button id="quantize" type="button">Quantize</button>
+          <button id="clear" type="button">Clear data</button>
+        </div> -->
         <div id="metronome">*</div>
         <div id="channels">
           <div class="channel" id="channel-0"></div>

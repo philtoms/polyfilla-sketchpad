@@ -16,7 +16,5 @@ export default context => ({
         'Content-type': 'application/json'
       },
       method: 'GET'
-    })
-      .then(res => res.json())
-      .then(data => (context.value.data = data))
+    }).then(res => res.json())
 });

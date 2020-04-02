@@ -53,6 +53,12 @@ app.get('/:title/data/:idx', (req, res) => {
   res.json(opus[idx]);
 });
 
+app.get('/:title/data/clear', (req, res) => {
+  const { title } = req.params;
+  opusList[title] = [];
+  res.json([]);
+});
+
 app.post('/:title/data', (req, res) => {
   const { title } = req.params;
   opusList[title] = req.body;

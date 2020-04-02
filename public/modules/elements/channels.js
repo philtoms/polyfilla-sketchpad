@@ -35,8 +35,9 @@ export default context => {
         const elNote = document.getElementById(noteId);
         this.element.scrollLeft = Math.max(0, elNote.offsetLeft - 375);
       }
-      // todo apply all channels
-      if (data && !this.channels[0].innerHTML) {
+      if (data != this.data) {
+        this.data = data;
+        // todo apply all channels
         const channel = 0;
         this.channels[channel].innerHTML = data.reduce((acc, data) => {
           const { name, idx } = data[channel];

@@ -6,7 +6,7 @@ export default options => {
   const ctx = new (window.AudioContext || window.webkitAudioContext)(options);
   const source = Source(ctx);
 
-  let _tempo = 80 / 60;
+  let _tempo = 60 / 120;
   let _beats = 4;
   let _noteValue = 1 / 4;
   let _ticks = 0;
@@ -49,11 +49,11 @@ export default options => {
       _tempo = 60 / value;
     },
     get signature() {
-      return `${_beats}/${_noteValue}`;
+      return [_beats, _noteValue];
     },
     set signature(value) {
       _beats = parseInt(value.split('/')[0]);
-      _noteValue = 1 / value.split('/')[1];
+      _noteValue = 1 / parseInt(value.split('/')[1]);
     },
     nextTime: lastTime => {
       const time = voicebox.time;
@@ -65,7 +65,7 @@ export default options => {
       return subscriptions.length - 1;
     },
     unsubscribe: sid => subscriptions.splice(sid, 1),
-    play: (vid, spn, time, cb) =>
+    play: (vid, spn, time = 0, cb) =>
       source({
         ...voices[vid](spn),
         start: time,
@@ -74,9 +74,9 @@ export default options => {
     schedule: events => {
       voicebox.cancel();
       const startTime = events[0].time;
-      const lead = 0.75 * 2;
+      const lead = _tempo * 2;
       _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
-        const next = idx ? ((time - startTime) * _tempo) / 0.75 : 0;
+        const next = idx ? ((time - startTime) * _tempo) / _tempo : 0;
         return [
           voicebox.play(vid, spn, next + lead),
           source({ cb, stop: next + lead })

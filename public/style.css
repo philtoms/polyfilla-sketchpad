@@ -29,7 +29,7 @@ label {
   margin-right: 10px;
 }
 
-#go.compose {
+#go .compose {
   display: none;
 }
 

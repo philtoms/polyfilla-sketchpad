@@ -30,7 +30,7 @@ export default context => {
   };
 
   const register = (channel, name, touch) => {
-    const { voicebox, data } = context.value;
+    const { voicebox, data, quantize } = context.value;
     if (!lastTime) {
       lastTime = data.length ? data[data.length - 1].time : 0;
     }
@@ -50,7 +50,8 @@ export default context => {
       touch
     };
     data.push({ ...emptyChannels, time, [channel]: event });
-    post(event);
+    quantize(idx);
+    post(data[idx][channel]);
     lastTime = time;
     return event;
   };

@@ -1,3 +1,4 @@
+import quantize from '../melody/quantize.js';
 import merge from '../utils/merge.js';
 import client from '../utils/client.js';
 
@@ -18,7 +19,7 @@ export default context => {
     },
     render() {
       const { voicebox, dynamics } = useContext(context);
-      if (dynamics) {
+      if (dynamics && dynamics.tempo) {
         voicebox.tempo = dynamics.tempo;
       }
     }
@@ -34,7 +35,7 @@ export default context => {
     },
     render() {
       const { voicebox, dynamics } = useContext(context);
-      if (dynamics) {
+      if (dynamics && dynamics.signature) {
         voicebox.signature = dynamics.signature;
       }
     }
@@ -54,7 +55,6 @@ export default context => {
       const { title } = useContext(context);
       if (!this.title) {
         this.title = title;
-        get();
       } else if (this.title !== title) {
         window.location.href = window.location.href.replace(this.title, title);
       }
@@ -67,13 +67,20 @@ export default context => {
         this.voicebox.init(
           merge(
             {
-              tempo: 80,
+              tempo: 120,
               signature: '4/4'
             },
             context.value.dynamics
           )
         );
-        provide({ state: 'compose' });
+        get().then(data => {
+          const quantizeData = quantize(this.voicebox.signature, data);
+          provide({
+            state: 'compose',
+            quantize: quantizeData,
+            data: quantizeData(0)
+          });
+        });
         e.target.className = 'compose';
       }
     },

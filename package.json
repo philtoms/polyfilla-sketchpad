@@ -5,13 +5,16 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "min": "asbundle ./public/index.js ./min.js"
+    "build": "npm run bundle && npm run min",
+    "bundle": "asbundle ./public/index.js ./script.js",
+    "min": "terser ./script.js -c --module -o ./min.js"
   },
   "dependencies": {
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "asbundle": "^2.6.0"
+    "asbundle": "^2.6.0",
+    "terser": "^4.6.9"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/hello-express"
