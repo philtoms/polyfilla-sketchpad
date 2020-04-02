@@ -4,18 +4,27 @@ const fs = require('fs');
 const mainTemplate = fs.readFileSync('./views/index.html', 'utf-8');
 const listTemplate = fs.readFileSync('./views/list.html', 'utf-8');
 
-let opusList = {};
+let sketchList = {};
 
 const app = express();
 app.use(express.json());
 app.use(express.static('assets'));
 app.use('/', express.static('public'));
 
+app.get('/data', (req, res) => {
+  res.json(sketchList);
+});
+
+app.post('/data', (req, res) => {
+  sketchList = req.body;
+  res.json({ count: Object.keys(sketchList).length });
+});
+
 app.get('/list?', (req, res) => {
   res.send(
     listTemplate.replace(
       '${sketches}',
-      `<ul>${Object.entries(opusList).reduce(
+      `<ul>${Object.entries(sketchList).reduce(
         (acc, [title, events]) =>
           `${acc}<li>${`<a href="/${title}">${title}</a><div class="events">${events
             .slice(0, 6)
@@ -32,10 +41,10 @@ app.get('/list?', (req, res) => {
 app.get('/:title?', (req, res) => {
   const { title } = req.params;
   if (!title) {
-    res.setHeader('location', `/opus-${Object.keys(opusList).length + 1}`);
+    res.setHeader('location', `/sketch-${Object.keys(sketchList).length + 1}`);
     return res.sendStatus(302);
   }
-  // opusList = {};
+  // sketchList = {};
   res.send(mainTemplate.replace('${title}', title));
 });
 
@@ -47,40 +56,40 @@ const emptyChannels = {
 
 app.post('/:title/data/:idx', (req, res) => {
   const { title, idx } = req.params;
-  const opus = opusList[title] || [];
+  const sketch = sketchList[title] || [];
   const event = req.body;
-  opus.length = idx;
-  opus[idx] = {
+  sketch.length = idx;
+  sketch[idx] = {
     ...emptyChannels,
-    ...opus[idx],
-    time: (opus[idx] || event).time,
+    ...sketch[idx],
+    time: (sketch[idx] || event).time,
     [event.channel]: event
   };
-  opusList[title] = opus;
+  sketchList[title] = sketch;
   res.json({ title, idx });
 });
 
 app.get('/:title/data', (req, res) => {
   const { title } = req.params;
-  const opus = opusList[title] || [];
-  res.json(opus);
+  const sketch = sketchList[title] || [];
+  res.json(sketch);
 });
 
 app.get('/:title/data/:idx', (req, res) => {
   const { title, idx } = req.params;
-  const opus = opusList[title] || [];
-  res.json(opus[idx]);
+  const sketch = sketchList[title] || [];
+  res.json(sketch[idx]);
 });
 
 app.get('/:title/data/clear', (req, res) => {
   const { title } = req.params;
-  opusList[title] = [];
+  sketchList[title] = [];
   res.json([]);
 });
 
 app.post('/:title/data', (req, res) => {
   const { title } = req.params;
-  opusList[title] = req.body;
+  sketchList[title] = req.body;
   res.json({ title });
 });
 

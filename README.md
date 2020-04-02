@@ -1,11 +1,19 @@
-## Download data
+## Download sketch
 
-curl 'https://sedate-efficacious-nation.glitch.me/opus-1/data' > data.json
+curl 'https://sedate-efficacious-nation.glitch.me/sketch/data' > sketch.json
 
-## Clear server data
+## Clear sketch data
 
-curl 'https://sedate-efficacious-nation.glitch.me/opus-1/data/clear'
+curl 'https://sedate-efficacious-nation.glitch.me/sketch/data/clear'
 
-## upload data
+## upload sketch
 
-curl -X POST -H "Content-Type: application/json" -d @data.json https://sedate-efficacious-nation.glitch.me/opus-1/data
+curl -X POST -H "Content-Type: application/json" -d @data.json https://sedate-efficacious-nation.glitch.me/sketch/data
+
+## Download all data
+
+curl 'https://sedate-efficacious-nation.glitch.me/data' > data.json
+
+## upload all data
+
+curl -X POST -H "Content-Type: application/json" -d @data.json https://sedate-efficacious-nation.glitch.me/data
