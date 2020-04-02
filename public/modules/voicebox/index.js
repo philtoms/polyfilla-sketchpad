@@ -75,7 +75,7 @@ export default options => {
       }),
     schedule: events => {
       voicebox.cancel();
-      const startTime = events[0].time;
+      const startTime = events.length && events[0].time;
       const lead = _scoreTempo * 2;
       _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
         const next = idx ? ((time - startTime) * _tempo) / _scoreTempo : 0;
@@ -85,7 +85,6 @@ export default options => {
         ];
       });
       voicebox.time = startTime - lead;
-      return events[0];
     },
     cancel: time => {
       _scheduled.forEach(([s, d]) => {

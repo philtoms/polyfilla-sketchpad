@@ -23,8 +23,8 @@ export default (signature, data) => {
     8: q8,
     '8t': (q8 / 3).toPrecision(3),
     16: q16
-  }).reduce((acc, [k, v]) => ({ ...acc, [v]: [k, v] }), {});
-  const qvalues = Object.keys(qvMap).map(q => Number.parseFloat(q));
+  }).reduce((acc, [k, v]) => ({ ...acc, [v]: [k, Number.parseFloat(v)] }), {});
+  const qvalues = Object.values(qvMap).map(([k, v]) => v);
   qvalues.sort((a, b) => b - a);
 
   const quantize = t => qvMap[qvalues.find(qt => t >= qt) || qvMap.q1d];

@@ -39,11 +39,13 @@ export default context => {
         this.data = data;
         // todo apply all channels
         const channel = 0;
-        this.channels[channel].innerHTML = data.reduce((acc, data) => {
-          const { name, idx } = data[channel];
-          const noteId = `${channel}-${idx}`;
-          return `${acc}<span id="${noteId}" class="event"> ${name} </span>`;
-        }, '');
+        this.channels[channel].innerHTML = data
+          .filter(Boolean)
+          .reduce((acc, data) => {
+            const { name, idx } = data[channel];
+            const noteId = `${channel}-${idx}`;
+            return `${acc}<span id="${noteId}" class="event"> ${name} </span>`;
+          }, '');
       }
     }
   });

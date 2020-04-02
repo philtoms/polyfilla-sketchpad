@@ -107,6 +107,11 @@ canvas {
   z-index: 2;
 }
 
+#list {
+  margin: 0 auto;
+  max-width: 600px;
+}
+
 #sketches li {
   text-align: left;
   display: flex;

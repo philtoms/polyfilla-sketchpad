@@ -13,7 +13,7 @@ export default context => {
         context.value.title = e.target.previousSibling.innerText;
         get().then(data => {
           this.voicebox.init(data.score);
-          context.value.data = data.events;
+          context.value.data = data.events.filter(Boolean);
           playback(0, 0);
         });
       }

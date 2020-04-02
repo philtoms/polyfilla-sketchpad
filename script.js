@@ -122,7 +122,7 @@ require.E(exports).default = context => {
         const { score = context.value.score, events = [] } = data;
         provide({
           score,
-          data: events
+          data: events.filter(Boolean)
         });
       });
     },
@@ -173,8 +173,8 @@ require.E(exports).default = (signature, data) => {
     8: q8,
     '8t': (q8 / 3).toPrecision(3),
     16: q16
-  }).reduce((acc, [k, v]) => ({ ...acc, [v]: [k, v] }), {});
-  const qvalues = Object.keys(qvMap).map(q => Number.parseFloat(q));
+  }).reduce((acc, [k, v]) => ({ ...acc, [v]: [k, Number.parseFloat(v)] }), {});
+  const qvalues = Object.values(qvMap).map(([k, v]) => v);
   qvalues.sort((a, b) => b - a);
 
   const quantize = t => qvMap[qvalues.find(qt => t >= qt) || qvMap.q1d];
@@ -273,26 +273,43 @@ require.E(exports).default = merge;
 },function (global, require, module, exports) {
 // modules/utils/client.js
 'use strict';
-require.E(exports).default = context => ({
-  post: (data, path = '') =>
+require.E(exports).default = context => {
+  const post = (data, path = '') =>
     fetch(`${context.value.title}/data/${path}`, {
       headers: {
         'Content-type': 'application/json'
       },
       method: 'POST',
       body: JSON.stringify(data)
-    }),
+    });
+
+  const batched = [];
+  setInterval(() => {
+    if (batched.length) {
+      const batch = batched.splice(0, Math.min(batched.length, 100));
+      post(batch, 'batch');
+    }
+  }, 3000);
+  const batch = data => {
+    batched.push(data);
+  };
   // .then(res => res.json())
   // .then(data => console.log(data)),
 
-  get: () =>
+  const get = () =>
     fetch(`${context.value.title}/data`, {
       headers: {
         'Content-type': 'application/json'
       },
       method: 'GET'
-    }).then(res => res.json())
-});
+    }).then(res => res.json());
+
+  return {
+    post,
+    batch,
+    get
+  };
+};
 
 },function (global, require, module, exports) {
 // modules/elements/compose.js
@@ -366,11 +383,13 @@ require.E(exports).default = context => {
         this.data = data;
         // todo apply all channels
         const channel = 0;
-        this.channels[channel].innerHTML = data.reduce((acc, data) => {
-          const { name, idx } = data[channel];
-          const noteId = `${channel}-${idx}`;
-          return `${acc}<span id="${noteId}" class="event"> ${name} </span>`;
-        }, '');
+        this.channels[channel].innerHTML = data
+          .filter(Boolean)
+          .reduce((acc, data) => {
+            const { name, idx } = data[channel];
+            const noteId = `${channel}-${idx}`;
+            return `${acc}<span id="${noteId}" class="event"> ${name} </span>`;
+          }, '');
       }
     }
   });
@@ -393,7 +412,7 @@ let lastTime = 0;
 let nextBeat = 0;
 
 require.E(exports).default = context => {
-  const { post } = client(context);
+  const { batch } = client(context);
   const play = (channel, touch) => {
     const { voicebox } = context.value;
     const note = select(touch.pageX, touch.pageY);
@@ -432,7 +451,7 @@ require.E(exports).default = context => {
     };
     data.push({ ...emptyChannels, time, [channel]: event });
     quantize(idx);
-    post(data[idx][channel], idx);
+    batch(data[idx][channel]);
     lastTime = time;
     return event;
   };
@@ -699,7 +718,7 @@ require.E(exports).default = context => {
         context.value.title = e.target.previousSibling.innerText;
         get().then(data => {
           this.voicebox.init(data.score);
-          context.value.data = data.events;
+          context.value.data = data.events.filter(Boolean);
           playback(0, 0);
         });
       }
@@ -791,8 +810,8 @@ require.E(exports).default = options => {
       }),
     schedule: events => {
       voicebox.cancel();
-      const startTime = events[0].time;
-      const lead = _tempo * 2;
+      const startTime = events.length && events[0].time;
+      const lead = _scoreTempo * 2;
       _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
         const next = idx ? ((time - startTime) * _tempo) / _scoreTempo : 0;
         return [
@@ -801,7 +820,6 @@ require.E(exports).default = options => {
         ];
       });
       voicebox.time = startTime - lead;
-      return events[0];
     },
     cancel: time => {
       _scheduled.forEach(([s, d]) => {

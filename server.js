@@ -1,13 +1,20 @@
 // server.js
 const express = require('express');
 const fs = require('fs');
+const bodyParser = require('body-parser');
 const mainTemplate = fs.readFileSync('./views/index.html', 'utf-8');
 const listTemplate = fs.readFileSync('./views/list.html', 'utf-8');
 
-let sketchList = {};
+let sketchList;
+try {
+  sketchList = JSON.parse(fs.readFileSync('./data/sketchList.json'));
+} catch (e) {
+  sketchList = {};
+}
 
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json({ limit: '50mb' }));
+// app.use(express.json());
 app.use(express.static('assets'));
 app.use('/', express.static('public'));
 
@@ -17,7 +24,9 @@ app.get('/data', (req, res) => {
 
 app.post('/data', (req, res) => {
   sketchList = req.body;
-  res.json({ count: Object.keys(sketchList).length });
+  fs.writeFile('./data/sketchList.json', JSON.stringify(sketchList), err => {
+    res.json({ err, count: Object.keys(sketchList).length });
+  });
 });
 
 app.get('/list', (req, res) => {
@@ -70,8 +79,27 @@ app.post('/:title/data/score', (req, res) => {
 
 app.get('/:title/data/clear', (req, res) => {
   const { title } = req.params;
-  sketchList[title] = [];
-  res.json([]);
+  delete sketchList[title];
+  res.json({});
+});
+
+app.post('/:title/data/batch', (req, res) => {
+  const { title } = req.params;
+  const sketch = sketchList[title] || emptySketch();
+  const events = sketch.events;
+  const batch = req.body;
+  batch.forEach(event => {
+    const { idx } = event;
+    events.length = idx;
+    events[idx] = {
+      ...emptyChannels,
+      ...events[idx],
+      time: (events[idx] || event).time,
+      [event.channel]: event
+    };
+  });
+  sketchList[title] = sketch;
+  res.json({ title });
 });
 
 app.post('/:title/data/:idx', (req, res) => {
@@ -101,6 +129,12 @@ app.post('/:title/data', (req, res) => {
   sketchList[title] = req.body;
   res.json({ title });
 });
+
+setInterval(() => {
+  fs.writeFile('./data/sketchList.json', JSON.stringify(sketchList), err => {
+    if (err) console.error(err);
+  });
+}, 3000);
 
 const listener = app.listen(process.env.PORT || 8080, () => {
   console.log('Your app is listening on port ' + listener.address().port);

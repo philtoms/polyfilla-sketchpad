@@ -66,7 +66,7 @@ export default context => {
         const { score = context.value.score, events = [] } = data;
         provide({
           score,
-          data: events
+          data: events.filter(Boolean)
         });
       });
     },

@@ -12,7 +12,7 @@ let lastTime = 0;
 let nextBeat = 0;
 
 export default context => {
-  const { post } = client(context);
+  const { batch } = client(context);
   const play = (channel, touch) => {
     const { voicebox } = context.value;
     const note = select(touch.pageX, touch.pageY);
@@ -51,7 +51,7 @@ export default context => {
     };
     data.push({ ...emptyChannels, time, [channel]: event });
     quantize(idx);
-    post(data[idx][channel], idx);
+    batch(data[idx][channel]);
     lastTime = time;
     return event;
   };
