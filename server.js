@@ -1,7 +1,8 @@
 // server.js
 const express = require('express');
 const fs = require('fs');
-const template = fs.readFileSync('./views/index.html', 'utf-8');
+const mainTemplate = fs.readFileSync('./views/index.html', 'utf-8');
+const listTemplate = fs.readFileSync('./views/list.html', 'utf-8');
 
 let opusList = {};
 
@@ -10,6 +11,24 @@ app.use(express.json());
 app.use(express.static('assets'));
 app.use('/', express.static('public'));
 
+app.get('/list?', (req, res) => {
+  res.send(
+    listTemplate.replace(
+      '${sketches}',
+      `<ul>${Object.entries(opusList).reduce(
+        (acc, [title, events]) =>
+          `${acc}<li>${`<a href="/${title}">${title}</a><div class="events">${events
+            .slice(0, 6)
+            .reduce(
+              (acc, event) => `${acc} ${event[0].name}`,
+              ''
+            )}</div>`}</li>`,
+        ''
+      )}</ul>`
+    )
+  );
+});
+
 app.get('/:title?', (req, res) => {
   const { title } = req.params;
   if (!title) {
@@ -17,7 +36,7 @@ app.get('/:title?', (req, res) => {
     return res.sendStatus(302);
   }
   // opusList = {};
-  res.send(template.replace('${title}', title));
+  res.send(mainTemplate.replace('${title}', title));
 });
 
 const emptyChannels = {

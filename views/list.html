@@ -1,0 +1,25 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Polyfiller Sketches</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/hooked-elements.js"></script>
+    <script type="module" src="/index.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <section id="list">
+        <h1>Polyfiller Sketches</h1>
+        <a href="/">New sketch</a>
+        <div id="sketches">
+          ${sketches}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

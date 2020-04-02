@@ -13,8 +13,8 @@
 'use strict';
 const log = require.I(require(1));
 const intro = require.I(require(2));
-const compose = require.I(require(5));
-const voicebox = require.I(require(13));
+const compose = require.I(require(6));
+const voicebox = require.I(require(15));
 
 const { createContext } = hookedElements;
 const assets = 'https://cdn.glitch.com/ee40e085-f63b-4369-9a4a-dc97bb39e335%2F';
@@ -52,8 +52,9 @@ require.E(exports).default = log;
 },function (global, require, module, exports) {
 // modules/elements/intro.js
 'use strict';
-const merge = require.I(require(3));
-const client = require.I(require(4));
+const quantize = require.I(require(3));
+const merge = require.I(require(4));
+const client = require.I(require(5));
 
 const { define, render, useContext } = hookedElements;
 
@@ -72,7 +73,7 @@ require.E(exports).default = context => {
     },
     render() {
       const { voicebox, dynamics } = useContext(context);
-      if (dynamics) {
+      if (dynamics && dynamics.tempo) {
         voicebox.tempo = dynamics.tempo;
       }
     }
@@ -88,7 +89,7 @@ require.E(exports).default = context => {
     },
     render() {
       const { voicebox, dynamics } = useContext(context);
-      if (dynamics) {
+      if (dynamics && dynamics.signature) {
         voicebox.signature = dynamics.signature;
       }
     }
@@ -108,7 +109,6 @@ require.E(exports).default = context => {
       const { title } = useContext(context);
       if (!this.title) {
         this.title = title;
-        get();
       } else if (this.title !== title) {
         window.location.href = window.location.href.replace(this.title, title);
       }
@@ -121,13 +121,20 @@ require.E(exports).default = context => {
         this.voicebox.init(
           merge(
             {
-              tempo: 80,
+              tempo: 120,
               signature: '4/4'
             },
             context.value.dynamics
           )
         );
-        provide({ state: 'compose' });
+        get().then(data => {
+          const quantizeData = quantize(this.voicebox.signature, data);
+          provide({
+            state: 'compose',
+            quantize: quantizeData,
+            data: quantizeData(0)
+          });
+        });
         e.target.className = 'compose';
       }
     },
@@ -140,13 +147,125 @@ require.E(exports).default = context => {
 };
 
 },function (global, require, module, exports) {
+// modules/melody/quantize.js
+'use strict';
+const BIGTIME = Number.MAX_VALUE;
+
+require.E(exports).default = (signature, data) => {
+  const [beats, noteValue] = signature;
+  const bar = beats * noteValue;
+  const q32 = bar / 32;
+  const q16 = q32 + q32;
+  const q8 = q16 + q16;
+  const q4 = q8 + q8;
+  const q2 = q4 + q4;
+  const q1 = bar;
+  const qvMap = Object.entries({
+    d1: q1 + q2,
+    1: q1,
+    '1t': (q1 / 3).toPrecision(3),
+    d2: q2 + q4,
+    2: q2,
+    '2t': (q2 / 3).toPrecision(3),
+    d4: q4 + q8,
+    4: q4,
+    '4t': (q4 / 3).toPrecision(3),
+    d8: q8 + q16,
+    8: q8,
+    '8t': (q8 / 3).toPrecision(3),
+    16: q16
+  }).reduce((acc, [k, v]) => ({ ...acc, [v]: [k, v] }), {});
+  const qvalues = Object.keys(qvMap).map(q => Number.parseFloat(q));
+  qvalues.sort((a, b) => b - a);
+
+  const quantize = t => qvMap[qvalues.find(qt => t >= qt) || qvMap.q1d];
+
+  const nudge = (time, idx) => {
+    data[idx] = {
+      time,
+      [0]: {
+        ...data[idx][0],
+        time
+      }
+    };
+    return time;
+  };
+
+  const snap = (time, idx) => {
+    const twip = time % q16;
+    if (twip) {
+      for (let i = idx; i < data.length; i++) {
+        nudge(data[i].time - twip, i);
+      }
+    }
+    return data[idx].time;
+  };
+
+  const maybeTriple = (time1, time2, time3, qspace) => {
+    const tt = time3 - time1;
+    const i1 = time2 - time1;
+    const i2 = time3 - time2;
+    if (time3 && tt <= qspace) {
+      if (Math.abs(i1 - i2) < q16) {
+        const qt = quantize(Math.max((i1 + i2) / 2, q16));
+        return qt[0].endsWith('t') && qt;
+      }
+    }
+    return 0;
+  };
+
+  return (start = 0, end) => {
+    let qbar = 0;
+    for (
+      // step back 3 for triples
+      let idx = Math.max(0, Math.min(start, start - 3));
+      idx < (end || data.length);
+      idx++
+    ) {
+      const event = data[idx];
+      const idx1 = idx + 1;
+      const idx2 = idx + 2;
+      const idx3 = idx + 3;
+      const time1 = snap(event.time, idx);
+      const time2 = idx1 < data.length ? data[idx1].time : 0;
+      const time3 = idx2 < data.length ? data[idx2].time : 0;
+      const time4 = idx3 < data.length ? data[idx3].time : BIGTIME;
+
+      qbar = Math.floor(time1 / bar) * bar;
+      const qnext = time2 - (time2 % q16) || qbar + bar;
+      const duration = quantize(qnext - time1);
+      console.log(qbar, time1, duration, qnext);
+      if (qnext === time1) {
+        nudge(qnext + q32, idx1);
+      } else {
+        const qspace = Math.min(
+          Math.max(0, qbar + bar - time1),
+          time4 - (time4 % q16) - time1
+        );
+        const qt = maybeTriple(time1, time2, time3, qspace);
+        if (qt) {
+          console.log(nudge(time1 + qt[1], idx1), qt);
+          console.log(nudge(time1 + qt[1] * 2, idx2), qt);
+          idx = idx2;
+        }
+      }
+    }
+    return data;
+  };
+};
+
+},function (global, require, module, exports) {
 // modules/utils/merge.js
 'use strict';
 const merge = (value, state = {}) =>
   Object.entries(state).reduce(
     (acc, [k, v]) => ({
       ...acc,
-      [k]: typeof v === 'object' ? { ...acc[k], ...merge(acc[k], v) } : v
+      [k]: Array.isArray(v)
+        ? v
+        : typeof v === 'object'
+        ? { ...acc[k], ...merge(acc[k], v) }
+        : v
     }),
     value
   );
@@ -173,18 +292,17 @@ require.E(exports).default = context => ({
         'Content-type': 'application/json'
       },
       method: 'GET'
-    })
-      .then(res => res.json())
-      .then(data => (context.value.data = data))
+    }).then(res => res.json())
 });
 
 },function (global, require, module, exports) {
 // modules/elements/compose.js
 'use strict';
-const channels = require.I(require(6));
-const touch = require.I(require(9));
-const backdrop = require.I(require(11));
-const metronome = require.I(require(12));
+const channels = require.I(require(7));
+const touch = require.I(require(10));
+const backdrop = require.I(require(12));
+const metronome = require.I(require(13));
+const controls = require.I(require(14));
 
 const { define, render, useContext } = hookedElements;
 
@@ -196,6 +314,7 @@ require.E(exports).default = context => {
       backdrop(context);
       channels(context);
       metronome(context);
+      controls(context);
     },
     render() {
       const { state } = useContext(context);
@@ -207,7 +326,7 @@ require.E(exports).default = context => {
 },function (global, require, module, exports) {
 // modules/elements/channels.js
 'use strict';
-const player = require.I(require(7));
+const player = require.I(require(8));
 
 const { define, render, useContext } = hookedElements;
 
@@ -244,8 +363,9 @@ require.E(exports).default = context => {
         const elNote = document.getElementById(noteId);
         this.element.scrollLeft = Math.max(0, elNote.offsetLeft - 375);
       }
-      // todo apply all channels
-      if (data && !this.channels[0].innerHTML) {
+      if (data != this.data) {
+        this.data = data;
+        // todo apply all channels
         const channel = 0;
         this.channels[channel].innerHTML = data.reduce((acc, data) => {
           const { name, idx } = data[channel];
@@ -260,8 +380,8 @@ require.E(exports).default = context => {
 },function (global, require, module, exports) {
 // modules/melody/player.js
 'use strict';
-const { select } = require(8);
-const client = require.I(require(4));
+const { select } = require(9);
+const client = require.I(require(5));
 
 const emptyChannels = {
   0: [],
@@ -292,7 +412,7 @@ require.E(exports).default = context => {
   };
 
   const register = (channel, name, touch) => {
-    const { voicebox, data } = context.value;
+    const { voicebox, data, quantize } = context.value;
     if (!lastTime) {
       lastTime = data.length ? data[data.length - 1].time : 0;
     }
@@ -312,7 +432,8 @@ require.E(exports).default = context => {
       touch
     };
     data.push({ ...emptyChannels, time, [channel]: event });
-    post(event);
+    quantize(idx);
+    post(data[idx][channel]);
     lastTime = time;
     return event;
   };
@@ -372,8 +493,8 @@ exports.select = select;
 },function (global, require, module, exports) {
 // modules/elements/touch-area.js
 'use strict';
-const { copy, draw, fade } = require(10);
-const player = require.I(require(7));
+const { copy, draw, fade } = require(11);
+const player = require.I(require(8));
 
 const { define, render, useContext } = hookedElements;
 
@@ -482,7 +603,7 @@ exports.draw = draw;
 },function (global, require, module, exports) {
 // modules/elements/touch-backdrop.js
 'use strict';
-const { basenotes } = require(8);
+const { basenotes } = require(9);
 
 const { define, render, useContext } = hookedElements;
 
@@ -535,17 +656,44 @@ require.E(exports).default = context => {
 };
 
 },function (global, require, module, exports) {
+// modules/elements/controls.js
+'use strict';
+const quantize = require.I(require(3));
+
+const { define, useContext } = hookedElements;
+
+require.E(exports).default = context => {
+  define('#controls', {
+    onclick(e) {
+      if (e.target.id === 'clear')
+        context.provide({ ...context.value, data: [] });
+      if (e.target.id === 'quantize') {
+        context.provide({
+          ...context.value,
+          data: quantize(this.voicebox.signature, this.data)
+        });
+      }
+    },
+    render() {
+      const { voicebox, data } = useContext(context);
+      this.voicebox = voicebox;
+      this.data = data;
+    }
+  });
+};
+
+},function (global, require, module, exports) {
 // modules/voicebox/index.js
 'use strict';
-const Voice = require.I(require(14));
-const Source = require.I(require(16));
+const Voice = require.I(require(16));
+const Source = require.I(require(18));
 
 require.E(exports).default = options => {
   const subscriptions = [];
   const ctx = new (window.AudioContext || window.webkitAudioContext)(options);
   const source = Source(ctx);
 
-  let _tempo = 80 / 60;
+  let _tempo = 60 / 120;
   let _beats = 4;
   let _noteValue = 1 / 4;
   let _ticks = 0;
@@ -588,11 +736,11 @@ require.E(exports).default = options => {
       _tempo = 60 / value;
     },
     get signature() {
-      return `${_beats}/${_noteValue}`;
+      return [_beats, _noteValue];
     },
     set signature(value) {
       _beats = parseInt(value.split('/')[0]);
-      _noteValue = 1 / value.split('/')[1];
+      _noteValue = 1 / parseInt(value.split('/')[1]);
     },
     nextTime: lastTime => {
       const time = voicebox.time;
@@ -604,7 +752,7 @@ require.E(exports).default = options => {
       return subscriptions.length - 1;
     },
     unsubscribe: sid => subscriptions.splice(sid, 1),
-    play: (vid, spn, time, cb) =>
+    play: (vid, spn, time = 0, cb) =>
       source({
         ...voices[vid](spn),
         start: time,
@@ -613,9 +761,9 @@ require.E(exports).default = options => {
     schedule: events => {
       voicebox.cancel();
       const startTime = events[0].time;
-      const lead = 0.75 * 2;
+      const lead = _tempo * 2;
       _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
-        const next = idx ? ((time - startTime) * _tempo) / 0.75 : 0;
+        const next = idx ? ((time - startTime) * _tempo) / _tempo : 0;
         return [
           voicebox.play(vid, spn, next + lead),
           source({ cb, stop: next + lead })
@@ -638,7 +786,7 @@ require.E(exports).default = options => {
 },function (global, require, module, exports) {
 // modules/voicebox/voice.js
 'use strict';
-const { fromSPN } = require(15);
+const { fromSPN } = require(17);
 
 require.E(exports).default = (ctx, sampleData) => {
   const naturals = [];

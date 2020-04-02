@@ -106,3 +106,21 @@ canvas {
 #touch {
   z-index: 2;
 }
+
+#sketches li {
+  text-align: left;
+  display: flex;
+  align-items: baseline;
+  justify-content: left;
+  overflow: hidden;
+}
+
+#sketches a {
+  padding: 5px;
+  width: 110px;
+}
+
+#sketches .events {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
