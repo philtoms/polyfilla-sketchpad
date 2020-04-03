@@ -5,8 +5,10 @@ export const basenotes = [...scale, ...scale, ...scale]
 
 let notes = basenotes;
 
+export const noteMap = y => notes.find(({ pos }) => Math.abs(pos - y) < 20);
+
 export const select = (oidx, y) => {
-  const note = notes.find(({ pos }) => Math.abs(pos - y) < 20);
+  const note = noteMap(y);
   if (note) {
     const octive =
       3 + Math.floor(note.idx / scale.length) + Math.floor(oidx / 200);

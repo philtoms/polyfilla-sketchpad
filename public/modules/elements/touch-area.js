@@ -11,7 +11,7 @@ export default context => {
       context.value.draw = draw(el.getContext('2d'));
       // bind mouse events to touch
       this.mousemove = this.ontouchmove.bind(this);
-      setInterval(fade(el.getContext('2d'), el.width, el.height), 30);
+      fade(el.getContext('2d'), el.width, el.height);
       render(this);
     },
     ontouchstart(e) {

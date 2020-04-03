@@ -22,12 +22,14 @@ export default (signature, data) => {
     d8: q8 + q16,
     8: q8,
     '8t': (q8 / 3).toPrecision(3),
-    16: q16
+    16: q16,
+    32: q32
   }).reduce((acc, [k, v]) => ({ ...acc, [v]: [k, Number.parseFloat(v)] }), {});
   const qvalues = Object.values(qvMap).map(([k, v]) => v);
   qvalues.sort((a, b) => b - a);
 
-  const quantize = t => qvMap[qvalues.find(qt => t >= qt) || qvMap.q1d];
+  const quantize = t =>
+    qvMap[qvalues.find(qt => t >= qt) || t < q32 ? q32 : q1 + q2];
 
   const nudge = (time, idx) => {
     data[idx] = {
@@ -82,8 +84,8 @@ export default (signature, data) => {
 
       qbar = Math.floor(time1 / bar) * bar;
       const qnext = time2 - (time2 % q16) || qbar + bar;
-      const duration = quantize(qnext - time1);
-      console.log(qbar, time1, duration, qnext);
+      data[idx].duration = quantize(qnext - time1)[0];
+      // console.log(qbar, time1, duration, qnext);
       if (qnext === time1) {
         nudge(qnext + q32, idx1);
       } else {
@@ -93,8 +95,10 @@ export default (signature, data) => {
         );
         const qt = maybeTriple(time1, time2, time3, qspace);
         if (qt) {
-          console.log(nudge(time1 + qt[1], idx1), qt);
-          console.log(nudge(time1 + qt[1] * 2, idx2), qt);
+          nudge(time1 + qt[1], idx1);
+          data[idx1].duration = qt;
+          nudge(time1 + qt[1] * 2, idx2);
+          data[idx2].duration = qt;
           idx = idx2;
         }
       }

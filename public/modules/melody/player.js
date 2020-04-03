@@ -1,4 +1,4 @@
-import { select } from './notes.js';
+import { select, noteMap } from './notes.js';
 import client from '../utils/client.js';
 
 const emptyChannels = {
@@ -25,8 +25,11 @@ export default context => {
   };
 
   const stop = touch => {
-    previousEvent.touch = touch;
-    previousEvent = {};
+    if (previousEvent.touch) {
+      const { draw = () => {} } = context.value;
+      draw({ ...previousEvent.touch, paintType: 'fill' });
+      previousEvent = {};
+    }
   };
 
   const register = (channel, name, touch) => {
@@ -47,13 +50,17 @@ export default context => {
       channel,
       name,
       time,
-      touch
+      touch: {
+        pageX: touch.pageX,
+        pageY: noteMap(touch.pageY).pos,
+        paintType: touch.paintType
+      }
     };
     data.push({ ...emptyChannels, time, [channel]: event });
     quantize(idx);
     batch(data[idx][channel]);
     lastTime = time;
-    return event;
+    return data[idx][channel];
   };
 
   const playback = (startpoint, channel = 0) => {
