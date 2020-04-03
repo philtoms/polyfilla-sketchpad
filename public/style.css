@@ -66,30 +66,42 @@ label {
   cursor: pointer;
 }
 
-@keyframes tick-0 {
+@keyframes blink-0 {
   from {
-    opacity: 1;
-  }
-  to {
     opacity: 0;
   }
-}
-@keyframes tick-1 {
-  from {
-    opacity: 1;
+  5% {
+    opacity: 0.5;
   }
-  to {
+}
+@keyframes blink-1 {
+  from {
     opacity: 0;
   }
+  5% {
+    opacity: 0.5;
+  }
 }
-
-#metronome.tick-0 {
-  animation: tick-0 0.2s;
-  animation-duration: 0.2s;
+#metronome {
+  opacity: 0;
 }
-#metronome.tick-1 {
-  animation: tick-1 0.2s;
-  animation-duration: 0.2s;
+#metronome.blink-0 {
+  animation: blink-0 0.5s;
+}
+#metronome.blink-1 {
+  animation: blink-1 0.5s;
+}
+#metronome.tick-0:after {
+  content: '1';
+}
+#metronome.tick-1:after {
+  content: '2';
+}
+#metronome.tick-2:after {
+  content: '3';
+}
+#metronome.tick-3:after {
+  content: '4';
 }
 
 canvas {
