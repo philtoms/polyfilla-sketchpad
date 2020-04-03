@@ -5,11 +5,12 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "npm run bundle && npm run min",
+    "build": "npm run bundle && npm run min && npm run cjs",
     "bundle": "asbundle ./public/index.js ./script.js",
     "min": "terser ./script.js -c --module -o ./min.js"
   },
   "dependencies": {
+    "esm": "^3.2.25",
     "express": "^4.17.1"
   },
   "devDependencies": {
@@ -22,7 +23,7 @@
   "license": "MIT",
   "keywords": [
     "node",
-    "glitch",
+    "web audio",
     "express"
   ]
 }

@@ -665,7 +665,7 @@ require.E(exports).default = context => {
       if (!this.voicebox) {
         this.voicebox = voicebox;
         this.voicebox.subscribe(beat => {
-          this.element.className = `tick-${beat % 2}`;
+          this.element.className = `tick-${beat} blink-${beat % 2}`;
           // console.log(beat, this.voicebox.time);
         });
       }

@@ -1,6 +1,6 @@
 export default context => {
   const post = (data, path = '') =>
-    fetch(`${context.value.title}/data/${path}`, {
+    fetch(`${context.value.title}/sketch/${path}`, {
       headers: {
         'Content-type': 'application/json'
       },
@@ -22,7 +22,7 @@ export default context => {
   // .then(data => console.log(data)),
 
   const get = () =>
-    fetch(`${context.value.title}/data`, {
+    fetch(`${context.value.title}/sketch`, {
       headers: {
         'Content-type': 'application/json'
       },

@@ -23,17 +23,10 @@ asbundle@^2.6.0:
     ascjs "^2.4.0"
     babylon "^6.18.0"
 
-ascjs@^2.4.0:
+ascjs@2.5.1, ascjs@^2.4.0:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/ascjs/-/ascjs-2.5.1.tgz#8957eb01ee71bf5d4cd179befe4e47944b6e4505"
   integrity sha512-OceO2r8Hf1fbOhKeOCnQxYzn0C7kLY78yAM72pggWwpa3h/vs+dnkDCoDkf0JzQZJgSDyrW7gcC9BZnhSgTpEg==
-  dependencies:
-    babylon "^6.18.0"
-
-ascjs@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/ascjs/-/ascjs-3.1.2.tgz#54e779bcc591586b38857fa344c1c7472384ed95"
-  integrity sha512-UkFj3oGJ0lj1iC5NkRscPLBWO5FEJPOhQaDonLVfrcHIWNiEPyqkB698pxGVdVxVtCSuHHgiWfzS8472TufV2A==
   dependencies:
     babylon "^6.18.0"
 
@@ -68,7 +61,7 @@ bytes@3.1.0:
   resolved "https://registry.yarnpkg.com/bytes/-/bytes-3.1.0.tgz#f6cf7933a360e0588fa9fde85651cdc7f805d1f6"
   integrity sha512-zauLjrfCG+xvoyaqLoV8bLVXXNGC4JqlxFCutSDWA6fJrTo2ZuvLYTqZ7aHBLZSMOopbzwv8f+wZcVzfVTI2Dg==
 
-commander@^2.20.0, commander@~2.20.3:
+commander@^2.20.0:
   version "2.20.3"
   resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
   integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
@@ -126,6 +119,11 @@ escape-html@~1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
   integrity sha1-Aljq5NPQwJdN4cFpGI7wBR0dGYg=
+
+esm@^3.2.25:
+  version "3.2.25"
+  resolved "https://registry.yarnpkg.com/esm/-/esm-3.2.25.tgz#342c18c29d56157688ba5ce31f8431fbb795cc10"
+  integrity sha512-U1suiZ2oDVWv4zPO56S0NcR5QriEahGtdN2OR6FiOG4WJvcjBVFB0qI4+eKoWFH483PKGuLuu6V8Z4T5g63UVA==
 
 etag@~1.8.1:
   version "1.8.1"
@@ -410,14 +408,6 @@ type-is@~1.6.17, type-is@~1.6.18:
   dependencies:
     media-typer "0.3.0"
     mime-types "~2.1.24"
-
-uglify-js@^3.8.1:
-  version "3.8.1"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.8.1.tgz#43bb15ce6f545eaa0a64c49fd29375ea09fa0f93"
-  integrity sha512-W7KxyzeaQmZvUFbGj4+YFshhVrMBGSg2IbcYAjGWGvx8DHvJMclbTDMpffdxFUGPBHjIytk7KJUR/KUXstUGDw==
-  dependencies:
-    commander "~2.20.3"
-    source-map "~0.6.1"
 
 unpipe@1.0.0, unpipe@~1.0.0:
   version "1.0.0"
