@@ -3,7 +3,7 @@ import player from '../melody/player.js';
 
 const { define, render, useContext } = hookedElements;
 
-export default context => {
+export default (context) => {
   const { play, stop } = player(context);
   define('#touch', {
     init() {
@@ -11,7 +11,6 @@ export default context => {
       context.value.draw = draw(el.getContext('2d'));
       // bind mouse events to touch
       this.mousemove = this.ontouchmove.bind(this);
-      fade(el.getContext('2d'), el.width, el.height);
       render(this);
     },
     ontouchstart(e) {
@@ -52,7 +51,13 @@ export default context => {
         el.offsetLeft + parent.offsetLeft,
         el.offsetTop + parent.offsetTop
       );
-      this.draw = useContext(context).draw;
-    }
+      const { draw, noteRange } = useContext(context);
+      if (noteRange && !this.draw) {
+        el.width = noteRange.orange * noteRange.ospan;
+        el.height = noteRange.range * noteRange.span;
+        this.draw = draw;
+        fade(el.getContext('2d'), el.width, el.height);
+      }
+    },
   });
 };

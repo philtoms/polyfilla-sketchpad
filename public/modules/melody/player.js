@@ -4,14 +4,14 @@ import client from '../utils/client.js';
 const emptyChannels = {
   0: [],
   1: [],
-  2: []
+  2: [],
 };
 
 let previousEvent = {};
 let lastTime = 0;
 let nextBeat = 0;
 
-export default context => {
+export default (context) => {
   const { batch } = client(context);
   const play = (channel, touch) => {
     const { voicebox } = context.value;
@@ -24,10 +24,10 @@ export default context => {
     }
   };
 
-  const stop = touch => {
+  const stop = (touch) => {
     if (previousEvent.touch) {
-      const { draw = () => {} } = context.value;
-      draw({ ...previousEvent.touch, paintType: 'fill' });
+      // const { draw = () => {} } = context.value;
+      // draw({ ...previousEvent.touch, paintType: 'fill' });
       previousEvent = {};
     }
   };
@@ -53,8 +53,8 @@ export default context => {
       touch: {
         pageX: touch.pageX,
         pageY: noteMap(touch.pageY).pos,
-        paintType: touch.paintType
-      }
+        paintType: touch.paintType,
+      },
     };
     data.push({ ...emptyChannels, time, [channel]: event });
     quantize(idx);
@@ -71,14 +71,14 @@ export default context => {
       data.slice(startpoint).reduce(
         (acc, event) =>
           acc.concat(
-            channels.map(channel => ({
+            channels.map((channel) => ({
               time: event[channel].time,
               spn: event[channel].name,
               vid: channel,
               cb: () => {
                 nextBeat = event[channel].idx + 1;
                 draw(event[channel].touch);
-              }
+              },
             }))
           ),
         []
@@ -89,6 +89,6 @@ export default context => {
   return {
     play,
     stop,
-    playback
+    playback,
   };
 };

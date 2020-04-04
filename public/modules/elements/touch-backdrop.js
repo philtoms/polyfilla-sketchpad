@@ -1,31 +1,41 @@
-import { basenotes } from '../melody/notes.js';
+import { setRange } from '../melody/notes.js';
 
 const { define, render, useContext } = hookedElements;
 
-export default context => {
+export default (context) => {
   define('#bars', {
     init() {
-      this.ctx = this.element.getContext('2d');
-      this.width = this.element.width;
-      this.height = this.element.height;
       render(this);
     },
     render() {
-      const { ctx, width, height } = this;
-      for (let i = 0, j = 20; i <= basenotes.length; i++, j += 40) {
-        ctx.beginPath();
-        ctx.moveTo(0, j);
-        ctx.lineTo(width, j);
-        ctx.lineWidth = 40;
-        ctx.strokeStyle = `rgba(10,20,30,${i / 20})`;
-        ctx.stroke();
+      const { state } = useContext(context);
+      if (state === 'layout') {
+        const ctx = this.element.getContext('2d');
+        const noteRange = setRange(
+          this.element.parentElement.clientWidth,
+          this.element.parentElement.clientHeight
+        );
+        const { range, span, span2, orange, ospan } = noteRange;
+        this.element.height = range * span;
+        this.element.width = orange * ospan;
+        for (let i = 0, j = span2; i <= range; i++, j += span) {
+          ctx.beginPath();
+          ctx.moveTo(0, j);
+          ctx.lineTo(this.element.width, j);
+          ctx.lineWidth = span;
+          ctx.strokeStyle = `rgba(10,20,30,${i / span2})`;
+          ctx.stroke();
+        }
+        for (let i = 1, j = ospan + ospan / 2; i < orange; i++, j += ospan) {
+          ctx.beginPath();
+          ctx.moveTo(j + 1, 0);
+          ctx.lineTo(j + 1, this.element.height);
+          ctx.lineWidth = ospan;
+          ctx.strokeStyle = `rgba(0,20,00,${i / 10})`;
+          ctx.stroke();
+        }
+        context.provide({ ...context.value, state: 'compose', noteRange });
       }
-      ctx.beginPath();
-      ctx.moveTo(width * 0.75, 0);
-      ctx.lineTo(width * 0.75, height);
-      ctx.lineWidth = width * 0.5;
-      ctx.strokeStyle = `rgba(0,20,00,0.2)`;
-      ctx.stroke();
-    }
+    },
   });
 };

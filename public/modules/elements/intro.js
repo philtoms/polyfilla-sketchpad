@@ -4,10 +4,10 @@ import client from '../utils/client.js';
 
 const { define, render, useContext } = hookedElements;
 
-export default context => {
+export default (context) => {
   const { get, post } = client(context);
 
-  const provide = state => {
+  const provide = (state) => {
     context.provide(merge(context.value, state));
     return context.value;
   };
@@ -24,7 +24,7 @@ export default context => {
         this.element.value = score.tempo;
         this.element.nextElementSibling.innerText = score.tempo;
       }
-    }
+    },
   });
   define('#signature', {
     oninput({ target: { value } }) {
@@ -37,7 +37,7 @@ export default context => {
         voicebox.signature = score.signature;
         this.element.value = score.signature;
       }
-    }
+    },
   });
   define('#title', {
     init() {
@@ -47,7 +47,7 @@ export default context => {
     },
     onchange({ target: { value } }) {
       provide({
-        title: value
+        title: value,
       });
     },
     render() {
@@ -57,16 +57,16 @@ export default context => {
       } else if (this.title !== title) {
         window.location.href = window.location.href.replace(this.title, title);
       }
-    }
+    },
   });
   define('#intro', {
     init() {
       render(this);
-      get().then(data => {
+      get().then((data) => {
         const { score = context.value.score, events = [] } = data;
         provide({
           score,
-          data: events.filter(Boolean)
+          data: events.filter(Boolean),
         });
       });
     },
@@ -76,8 +76,8 @@ export default context => {
         const { score, voicebox, data } = context.value;
         voicebox.init(score);
         provide({
-          state: 'compose',
-          quantize: quantize(voicebox.signature, data)
+          state: 'layout',
+          quantize: quantize(voicebox.signature, data),
         });
         e.target.className = 'compose';
       }
@@ -85,6 +85,6 @@ export default context => {
     render() {
       const { state } = useContext(context);
       this.element.className = state;
-    }
+    },
   });
 };

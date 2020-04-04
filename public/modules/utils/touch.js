@@ -15,7 +15,6 @@ export const copy = (offsetX, offsetY) => (
 });
 
 export const fade = (ctx, width, height) => {
-  let o = 255;
   raf(() => {
     const imageData = ctx.getImageData(0, 0, width, height);
     const data = imageData.data;
@@ -26,7 +25,7 @@ export const fade = (ctx, width, height) => {
     }
     ctx.putImageData(imageData, 0, 0);
     fade(ctx, width, height);
-  }, 30);
+  });
 };
 
 export const draw = (ctx) => ({ pageX, pageY, paintType }) => {
