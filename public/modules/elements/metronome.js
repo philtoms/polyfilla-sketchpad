@@ -1,16 +1,17 @@
 const { define, useContext } = hookedElements;
 
-export default context => {
+export default (context) => {
   define('#metronome', {
     render() {
       const { voicebox } = useContext(context);
       if (!this.voicebox) {
         this.voicebox = voicebox;
-        this.voicebox.subscribe(beat => {
-          this.element.className = `tick-${beat} blink-${beat % 2}`;
+        let blink = 0;
+        this.voicebox.subscribe((beat) => {
+          this.element.className = `tick-${beat} blink-${(blink = 1 - blink)}`;
           // console.log(beat, this.voicebox.time);
         });
       }
-    }
+    },
   });
 };

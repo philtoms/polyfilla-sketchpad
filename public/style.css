@@ -95,13 +95,13 @@ label {
   content: '1';
 }
 #metronome.tick-1:after {
-  content: '2';
+  content: '+';
 }
 #metronome.tick-2:after {
-  content: '3';
+  content: '+';
 }
 #metronome.tick-3:after {
-  content: '4';
+  content: '+';
 }
 
 canvas {
