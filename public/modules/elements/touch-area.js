@@ -46,11 +46,12 @@ export default (context) => {
 
     render() {
       const el = this.element;
-      const parent = el.offsetParent || { offsetLeft: 0, offsetTop: 0 };
-      this.copy = copy(
-        el.offsetLeft + parent.offsetLeft,
-        el.offsetTop + parent.offsetTop
-      );
+      if (el.offsetParent) {
+        this.copy = copy(
+          el.offsetLeft + el.offsetParent.offsetLeft,
+          el.offsetTop + el.offsetParent.offsetTop
+        );
+      }
       const { draw, noteRange } = useContext(context);
       if (noteRange && !this.draw) {
         el.width = noteRange.orange * noteRange.ospan;

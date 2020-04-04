@@ -73,13 +73,13 @@ export default (context) => {
     onclick(e) {
       if (e.target.type === 'submit') {
         e.preventDefault();
+        e.target.className = 'compose';
         const { score, voicebox, data } = context.value;
         voicebox.init(score);
         provide({
           state: 'layout',
           quantize: quantize(voicebox.signature, data),
         });
-        e.target.className = 'compose';
       }
     },
     render() {

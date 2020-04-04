@@ -1,4 +1,4 @@
-import { select, noteMap } from './notes.js';
+import { select, note } from './notes.js';
 import client from '../utils/client.js';
 
 const emptyChannels = {
@@ -15,11 +15,10 @@ export default (context) => {
   const { batch } = client(context);
   const play = (channel, touch) => {
     const { voicebox } = context.value;
-    const note = select(touch.pageX, touch.pageY);
-
-    if (note && note !== previousEvent.name) {
-      previousEvent = register(channel, note, touch);
-      voicebox.play(0, note);
+    const name = select(touch.pageX, touch.pageY).name;
+    if (name && name !== previousEvent.name) {
+      previousEvent = register(channel, name, touch);
+      voicebox.play(0, name);
       return previousEvent;
     }
   };
@@ -52,8 +51,7 @@ export default (context) => {
       time,
       touch: {
         pageX: touch.pageX,
-        pageY: noteMap(touch.pageY).pos,
-        paintType: touch.paintType,
+        pageY: touch.pageY,
       },
     };
     data.push({ ...emptyChannels, time, [channel]: event });
@@ -77,7 +75,8 @@ export default (context) => {
               vid: channel,
               cb: () => {
                 nextBeat = event[channel].idx + 1;
-                draw(event[channel].touch);
+                const { pos } = note(event[channel].name);
+                draw({ pageX: event[channel].touch.pageX, pageY: pos });
               },
             }))
           ),
