@@ -36,7 +36,7 @@ label {
 #compose {
   display: none;
   width: 90vw;
-  height: 80vw;
+  height: 60vh;
   max-height: 500px;
   max-width: 500px;
   margin: auto;
