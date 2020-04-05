@@ -8,7 +8,7 @@ export default (context) => {
   define('#touch', {
     init() {
       const el = this.element;
-      context.value.draw = draw(el.getContext('2d'));
+      context.value.drawCtx = el.getContext('2d');
       // bind mouse events to touch
       this.mousemove = this.ontouchmove.bind(this);
       render(this);
@@ -52,12 +52,12 @@ export default (context) => {
           el.offsetTop + el.offsetParent.offsetTop
         );
       }
-      const { draw, noteRange } = useContext(context);
+      const { drawCtx, noteRange } = useContext(context);
       if (noteRange && !this.draw) {
         el.width = noteRange.orange * noteRange.ospan;
         el.height = noteRange.range * noteRange.span;
-        this.draw = draw;
-        fade(el.getContext('2d'), el.width, el.height);
+        this.draw = draw(drawCtx);
+        fade(drawCtx, el.width, el.height);
       }
     },
   });

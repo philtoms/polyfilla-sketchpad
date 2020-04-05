@@ -28,17 +28,20 @@ export const fade = (ctx, width, height) => {
   });
 };
 
-export const draw = (ctx) => ({ pageX, pageY, paintType }) => {
-  const color = `rgb(0,0,0)`;
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-  ctx.lineWidth = 2;
-  if (paintType === 'fill') {
-    ctx.beginPath();
-    ctx.arc(pageX, pageY, 2, 0, 2 * Math.PI, false); // a circle at the start
-    ctx.fill();
-  } else {
-    ctx.lineTo(pageX, pageY);
-    ctx.stroke();
-  }
+export const draw = (ctx) => {
+  ctx.beginPath();
+  return ({ pageX, pageY, paintType }) => {
+    const color = `rgb(0,0,0)`;
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2;
+    if (paintType === 'fill') {
+      ctx.beginPath();
+      ctx.arc(pageX, pageY, 2, 0, 2 * Math.PI, false); // a circle at the start
+      ctx.fill();
+    } else {
+      ctx.lineTo(pageX, pageY);
+      ctx.stroke();
+    }
+  };
 };

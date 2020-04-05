@@ -1,5 +1,6 @@
 import { select, note } from './notes.js';
 import client from '../utils/client.js';
+import { draw } from '../utils/touch.js';
 
 const emptyChannels = {
   0: [],
@@ -62,8 +63,9 @@ export default (context) => {
   };
 
   const playback = (startpoint, channel = 0) => {
-    const { voicebox, data, draw = () => {} } = context.value;
+    const { voicebox, data, drawCtx } = context.value;
     const channels = [].concat(channel);
+    const redraw = draw(drawCtx);
     nextBeat = startpoint;
     voicebox.schedule(
       data.slice(startpoint).reduce(
@@ -76,7 +78,7 @@ export default (context) => {
               cb: () => {
                 nextBeat = event[channel].idx + 1;
                 const { pos } = note(event[channel].name);
-                draw({ pageX: event[channel].touch.pageX, pageY: pos });
+                redraw({ pageX: event[channel].touch.pageX, pageY: pos });
               },
             }))
           ),
