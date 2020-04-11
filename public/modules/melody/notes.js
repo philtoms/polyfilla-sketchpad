@@ -35,21 +35,26 @@ export const setRange = (width, height) => {
   );
   ospan2 = ospan / 2;
   orange = Math.floor(width / ospan);
-  for (let idx = 0; idx < range * orange; idx++) {
-    const interval = Math.floor(idx / range);
-    const octive = 2 + Math.floor(idx / scale.length);
-    const key = scale[idx % scale.length];
-    basenotes[idx] = {
-      key,
-      pos: span * range - span * (idx % range) - span2,
-      opos: interval * ospan + ospan2,
-      idx,
-      octive,
-      interval,
-      name: `${key}${octive}`,
-    };
+  const baseOctive = Math.max(
+    0,
+    Math.floor((11 - (range * orange) / scale.length) / 2)
+  );
+  for (let y = 0, idx = 0; y < range; y++) {
+    for (let x = 0; x < orange; x++, idx++) {
+      const interval = Math.floor(idx / range);
+      const octive = baseOctive + Math.floor(idx / scale.length);
+      const key = scale[idx % scale.length];
+      basenotes[idx] = {
+        key,
+        pos: span * range - span * (idx % range) - span2,
+        opos: interval * ospan + ospan2,
+        idx,
+        octive,
+        interval,
+        name: `${key}${octive}`,
+      };
+    }
   }
-
   noteMap = basenotes.reduce(
     (acc, note) => ({ ...acc, [note.name]: note }),
     {}
@@ -60,10 +65,10 @@ export const setRange = (width, height) => {
 export const note = (name) => noteMap[name];
 
 export const select = (x, y) => {
-  const note = basenotes.find(({ pos }) => Math.abs(pos - y) <= span2);
-  if (note) {
-    const octive =
-      2 + Math.floor(note.idx / scale.length) + Math.floor(x / ospan);
-    return { ...note, name: `${note.key}${octive}` };
-  }
+  const xpos = Math.min(orange * ospan, x);
+  const ypos = Math.min(range * span, y);
+  return basenotes.find(
+    ({ pos, opos }) =>
+      Math.abs(pos - ypos) <= span2 && Math.abs(opos - xpos) <= ospan2
+  );
 };

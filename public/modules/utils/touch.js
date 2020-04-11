@@ -5,8 +5,8 @@ export const copy = (offsetX, offsetY) => (
   paintType
 ) => ({
   channel: identifier,
-  pageX: pageX - offsetX,
-  pageY: pageY - offsetY,
+  pageX: Math.abs(pageX - offsetX),
+  pageY: Math.abs(pageY - offsetY),
   radiusX,
   radiusY,
   rotationAngle,
