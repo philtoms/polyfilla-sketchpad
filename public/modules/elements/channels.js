@@ -7,7 +7,7 @@ export default (context) => {
   const { playback } = player(context);
   let barCount = 0;
   let selectHandle;
-  define('#sketch', {
+  define('#score', {
     init() {
       this.channels = Array.from(this.element.children).reduce(
         (acc, el, channel) => ({ ...acc, [channel]: el }),
@@ -31,7 +31,7 @@ export default (context) => {
       this.drawCtx = drawCtx;
       if (bvn && bvn !== this.bvn) {
         this.bvn = bvn;
-        const [bid] = bvn;
+        const [bid, nid] = bvn;
         let elBar = document.getElementById(`b-${bid}`);
         if (!elBar) {
           this.element.innerHTML += `<div class="bar" id="b-${bid}"></div>`;
@@ -46,6 +46,7 @@ export default (context) => {
             }">${note.name}</div>`,
           ''
         )}</div>`;
+        document.getElementById(`n-${bid}-${0}-${nid}`).scrollIntoView();
       }
       if (data != this.data) {
         this.data = data;

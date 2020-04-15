@@ -74,12 +74,11 @@ export default (options) => {
         cb,
       }),
     schedule: (events) => {
-      //      voicebox.cancel();
       const startTime = events.length ? events[0].time : 0;
       const lead = _scoreTempo * 2;
       _scheduled = events.map((event, idx) => {
         const { vid, spn, time, cb } = event;
-        const next = idx ? ((time - startTime) * _tempo) / _scoreTempo : 0;
+        const next = ((time - startTime) * _tempo) / _scoreTempo;
         return [
           voicebox.play(vid, spn, next + lead),
           source({ cb: () => cb(event), stop: next + lead }),

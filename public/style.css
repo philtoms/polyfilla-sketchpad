@@ -56,28 +56,30 @@ label {
 #sketch {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  width: 90%;
+  width: 40%;
   margin: 0 auto;
   overflow-x: scroll;
   height: 50px;
   padding: 10px;
-  display: flex;
-  justify-content: center;
+}
+
+#score {
+  white-space: nowrap;
 }
 
 .bar {
-  text-overflow: ellipsis;
-  white-space: nowrap;
   border-left: black solid 1px;
+  display: inline-block;
 }
+
 .voice {
   padding: 3px;
   cursor: pointer;
-  display: flex;
 }
 
 .note {
   cursor: pointer;
+  display: inline-block;
 }
 
 .t-16 {

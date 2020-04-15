@@ -56,7 +56,7 @@ export default (context) => {
     voicebox.cancel();
 
     const bid = Math.max(0, startpoint - 1);
-
+    const bidEnd = startpoint ? bid + count + 2 : bid + count;
     nextBar = startpoint;
     const [bar] = signature.split('/');
     const tbar = (bar * 60) / tempo;
@@ -75,7 +75,7 @@ export default (context) => {
       };
       let lastIdx = 0;
       voicebox.schedule(
-        bars.slice(bid, bid + count + 2).reduce(
+        bars.slice(bid, bidEnd).reduce(
           (acc, bar, bid) =>
             acc.concat(
               Object.values(voices).reduce(
