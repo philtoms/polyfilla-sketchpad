@@ -1,10 +1,13 @@
 import player from '../melody/player.js';
+import { draw } from '../utils/touch.js';
 
 const { define, render, useContext } = hookedElements;
 
-export default context => {
+export default (context) => {
   const { playback } = player(context);
-  define('#channels', {
+  let barCount = 0;
+  let selectHandle;
+  define('#sketch', {
     init() {
       this.channels = Array.from(this.element.children).reduce(
         (acc, el, channel) => ({ ...acc, [channel]: el }),
@@ -14,39 +17,48 @@ export default context => {
     },
     onclick(e) {
       e.preventDefault();
-      const startpoint = e.target.id.split('-').pop();
-      playback(parseInt(startpoint), 0);
+      const startpoint = e.target.id.split('-')[1];
+      clearTimeout(selectHandle);
+      barCount = (barCount % 3) + 1;
+      selectHandle = setTimeout(() => {
+        playback(parseInt(startpoint), barCount, draw(this.drawCtx));
+        barCount = 0;
+      }, 1000);
     },
     render() {
-      const { note, voicebox, data } = useContext(context);
+      const { bvn, voicebox, data, drawCtx } = useContext(context);
       this.voicebox = voicebox;
-      if (note && note !== this.note) {
-        this.note = note;
-        const { channel, name, idx } = note;
-        const noteId = `${channel}-${idx}`;
-        const event = `<span id="${noteId}" class="event"> ${name} </span>`;
-        let node = document.getElementById(noteId);
-        while (node) {
-          const next = node.nextSibling;
-          node.parentNode.removeChild(node);
-          node = next;
+      this.drawCtx = drawCtx;
+      if (bvn && bvn !== this.bvn) {
+        this.bvn = bvn;
+        const [bid] = bvn;
+        let elBar = document.getElementById(`b-${bid}`);
+        if (!elBar) {
+          this.element.innerHTML += `<div class="bar" id="b-${bid}"></div>`;
+          elBar = document.getElementById(`b-${bid}`);
         }
-        this.channels[channel].innerHTML += event;
-        const elNote = document.getElementById(noteId);
-        this.element.scrollLeft = Math.max(0, elNote.offsetLeft - 375);
+        elBar.innerHTML = `<div class="voice" id="v-${bid}-${0}">${data.bars[
+          bid
+        ][0].notes.reduce(
+          (acc, note) =>
+            `${acc}<div class="note t-${note.duration[0]}" id="n-${bid}-${0}-${
+              note.nid
+            }">${note.name}</div>`,
+          ''
+        )}</div>`;
       }
       if (data != this.data) {
         this.data = data;
-        // todo apply all channels
-        const channel = 0;
-        this.channels[channel].innerHTML = data
+        // todo apply all voices
+        const voice = 0;
+        this.element.innerHTML = data.bars
           .filter(Boolean)
           .reduce((acc, data) => {
-            const { name, idx } = data[channel];
-            const noteId = `${channel}-${idx}`;
+            const { name, idx } = data[voice];
+            const noteId = `${voice}-${idx}`;
             return `${acc}<span id="${noteId}" class="event"> ${name} </span>`;
           }, '');
       }
-    }
+    },
   });
 };

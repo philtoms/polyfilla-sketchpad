@@ -63,10 +63,17 @@ export default (context) => {
     init() {
       render(this);
       get().then((data) => {
-        const { score = context.value.score, events = [] } = data;
+        const {
+          score = context.value.score,
+          bars = [],
+          voices = { lead: 0 },
+        } = data;
         provide({
           score,
-          data: events.filter(Boolean),
+          data: {
+            voices,
+            bars,
+          },
         });
       });
     },
@@ -78,7 +85,7 @@ export default (context) => {
         voicebox.init(score);
         provide({
           state: 'layout',
-          quantize: quantize(voicebox.signature, data),
+          quantize: quantize(score, data),
         });
       }
     },

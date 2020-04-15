@@ -1,56 +1,69 @@
 const BIGTIME = Number.MAX_VALUE;
 
-export default (signature, data) => {
-  const [beats, noteValue] = signature;
-  const bar = beats * noteValue;
-  const q32 = bar / 32;
-  const q16 = q32 + q32;
-  const q8 = q16 + q16;
-  const q4 = q8 + q8;
-  const q2 = q4 + q4;
-  const q1 = bar;
+/*
+  tempo 60
+  bar 3
+  beat 4
+  tbar = bar * 60 / tempo = 3 * 60 / 60 = 3
+  q[beat] = q4 = tbar / bar = 3 / 3 = 1
+  0                   12                  24
+  |                   |                   |
+    t1=2         1         2         4         5
+
+*/
+export default ({ tempo, signature }, data) => {
+  const [bar, beat] = signature.split('/');
+  const tbar = (bar * 60) / tempo;
+  const tbar2 = tbar + tbar;
+  const tbeat = tbar / bar;
+  const t = [64, 32, 16, 8, 4, 2, 1].reduce(
+    (acc, q) => ({ ...acc, [q]: (tbeat * beat) / q }),
+    {}
+  );
+  const q64 = t[64];
+  const q32 = t[32];
+  const q16 = t[16];
+  const q8 = t[8];
+  const q4 = t[4];
+  const q2 = t[2];
+  const q1 = t[1];
+
+  const snap = (time) => time - (time % q64);
+
   const qvMap = Object.entries({
     d1: q1 + q2,
     1: q1,
-    '1t': (q1 / 3).toPrecision(3),
+    '1t': snap(q1 / 3),
     d2: q2 + q4,
     2: q2,
-    '2t': (q2 / 3).toPrecision(3),
+    '2t': snap(q2 / 3),
     d4: q4 + q8,
     4: q4,
-    '4t': (q4 / 3).toPrecision(3),
+    '4t': snap(q4 / 3),
     d8: q8 + q16,
     8: q8,
-    '8t': (q8 / 3).toPrecision(3),
+    '8t': snap(q8 / 3),
     16: q16,
-    32: q32
+    // 32: q32,
+    // 64: q64,
   }).reduce((acc, [k, v]) => ({ ...acc, [v]: [k, Number.parseFloat(v)] }), {});
-  const qvalues = Object.values(qvMap).map(([k, v]) => v);
+  const qvalues = Object.values(qvMap)
+    .filter(([k]) => !k.endsWith('t'))
+    .map(([k, v]) => v);
   qvalues.sort((a, b) => b - a);
+  const tvalues = Object.values(qvMap)
+    .filter(([k]) => k.endsWith('t'))
+    .map(([k, v]) => v);
+  tvalues.sort((a, b) => b - a);
+  console.log(qvalues, tvalues);
 
-  const quantize = t =>
-    qvMap[qvalues.find(qt => t >= qt) || t < q32 ? q32 : q1 + q2];
-
-  const nudge = (time, idx) => {
-    data[idx] = {
-      time,
-      [0]: {
-        ...data[idx][0],
-        time
-      }
-    };
-    return time;
-  };
-
-  const snap = (time, idx) => {
-    const twip = time % q16;
-    if (twip) {
-      for (let i = idx; i < data.length; i++) {
-        nudge(data[i].time - twip, i);
-      }
-    }
-    return data[idx].time;
-  };
+  const quantize = (t, values = qvalues) =>
+    qvMap[
+      values.reduce((v, qt) => {
+        const d = Math.abs(t - qt);
+        return d < Math.abs(t - v) ? qt : v;
+      }, q1 + q2)
+    ];
 
   const maybeTriple = (time1, time2, time3, qspace) => {
     const tt = time3 - time1;
@@ -58,51 +71,60 @@ export default (signature, data) => {
     const i2 = time3 - time2;
     if (time3 && tt <= qspace) {
       if (Math.abs(i1 - i2) < q16) {
-        const qt = quantize(Math.max((i1 + i2) / 2, q16));
-        return qt[0].endsWith('t') && qt;
+        return quantize(Math.max((i1 + i2) / 2, q16), tvalues);
       }
     }
     return 0;
   };
 
-  return (start = 0, end) => {
-    let qbar = 0;
-    for (
-      // step back 3 for triples
-      let idx = Math.max(0, Math.min(start, start - 3));
-      idx < (end || data.length);
-      idx++
-    ) {
-      const event = data[idx];
-      const idx1 = idx + 1;
-      const idx2 = idx + 2;
-      const idx3 = idx + 3;
-      const time1 = snap(event.time, idx);
-      const time2 = idx1 < data.length ? data[idx1].time : 0;
-      const time3 = idx2 < data.length ? data[idx2].time : 0;
-      const time4 = idx3 < data.length ? data[idx3].time : BIGTIME;
+  return (bid, vid, time, note) => {
+    if (time % tbar2 > tbar) {
+      bid++;
+      note.nid = 0;
+      time %= tbar;
+    }
+    const bar = data.bars[bid] || {
+      bid,
+    };
+    data.bars[bid] = bar;
 
-      qbar = Math.floor(time1 / bar) * bar;
-      const qnext = time2 - (time2 % q16) || qbar + bar;
-      data[idx].duration = quantize(qnext - time1)[0];
-      // console.log(qbar, time1, duration, qnext);
-      if (qnext === time1) {
-        nudge(qnext + q32, idx1);
+    const voice = bar[vid] || { vid, bid, notes: [] };
+    bar[vid] = voice;
+
+    const notes = voice.notes;
+    note.nid = note.nid || 0;
+    note.time = snap(time);
+    note.qtime = quantize(time)[1];
+
+    notes.length = note.nid;
+    notes[note.nid] = note;
+
+    for (let idx1 = 0; idx1 < notes.length; idx1++) {
+      const idx2 = idx1 + 1;
+      const idx3 = idx2 + 1;
+      const time1 = notes[idx1].qtime;
+      const time2 = idx2 < notes.length ? notes[idx2].time : 0;
+      const time3 = idx3 < notes.length ? notes[idx3].time : 0;
+      const qspace = tbar - time1;
+      const qt = maybeTriple(time1, time2, time3, qspace);
+      if (qt) {
+        notes[idx1].qtime = time1;
+        notes[idx1].duration = qt;
+        notes[idx2].qtime = time1 + qt[1];
+        notes[idx2].duration = qt;
+        notes[idx3].qtime = time1 + qt[1] + qt[1];
+        notes[idx3].duration = qt;
+        idx1 = idx3;
       } else {
-        const qspace = Math.min(
-          Math.max(0, qbar + bar - time1),
-          time4 - (time4 % q16) - time1
-        );
-        const qt = maybeTriple(time1, time2, time3, qspace);
-        if (qt) {
-          nudge(time1 + qt[1], idx1);
-          data[idx1].duration = qt;
-          nudge(time1 + qt[1] * 2, idx2);
-          data[idx2].duration = qt;
-          idx = idx2;
+        const qnext = time2 || tbar;
+        if (time2 && qnext === time1) {
+          notes[idx2].qtime += q32;
         }
+        notes[idx1].qtime = time1;
+        notes[idx1].duration = quantize(qnext - time1);
       }
     }
-    return data;
+    // console.log(bid, note.time, note.qtime, time);
+    return [bid, note.nid];
   };
 };

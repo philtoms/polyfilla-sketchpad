@@ -17,17 +17,17 @@ export default (context) => {
       e.preventDefault();
       this.element.addEventListener('mousemove', this.mousemove, false);
       const touch = this.copy((e.changedTouches || [e])[0], 'fill');
-      const note = play(touch.channel, touch);
+      const bvn = play(touch.channel, touch);
       this.draw(touch);
-      context.provide({ ...context.value, note });
+      context.provide({ ...context.value, bvn });
     },
 
     ontouchmove(e) {
       e.preventDefault();
       const touch = this.copy((e.changedTouches || [e])[0]);
-      const note = play(touch.channel, touch);
+      const bvn = play(touch.channel, touch);
       this.draw(touch);
-      context.provide({ ...context.value, note });
+      context.provide({ ...context.value, bvn });
     },
 
     ontouchend(e) {

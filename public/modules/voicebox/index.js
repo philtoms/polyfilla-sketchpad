@@ -1,7 +1,7 @@
 import Voice from './voice.js';
 import Source from './source.js';
 
-export default options => {
+export default (options) => {
   const subscriptions = [];
   const ctx = new (window.AudioContext || window.webkitAudioContext)(options);
   const source = Source(ctx);
@@ -13,7 +13,7 @@ export default options => {
   let _ticks = 0;
   let _scheduled = [];
 
-  const init = options => {
+  const init = (options) => {
     voicebox.tempo = options.tempo;
     _scoreTempo = _tempo;
     voicebox.signature = options.signature;
@@ -27,7 +27,7 @@ export default options => {
     const clock = () => {
       source({ cb: clock, stop: _tempo });
       const tick = _ticks++ % _beats;
-      subscriptions.forEach(cb => cb(tick));
+      subscriptions.forEach((cb) => cb(tick));
     };
     clock();
     return ctx;
@@ -57,42 +57,42 @@ export default options => {
       _beats = parseInt(value.split('/')[0]);
       _noteValue = 1 / parseInt(value.split('/')[1]);
     },
-    nextTime: lastTime => {
-      const time = voicebox.time;
-      if (time > lastTime + _tempo * _beats) voicebox.time = lastTime + _tempo;
+    nextTime: (lastTime) => {
+      // const time = voicebox.time;
+      // if (time > lastTime + _tempo * _beats) voicebox.time = lastTime + _tempo;
       return voicebox.time;
     },
-    subscribe: cb => {
+    subscribe: (cb) => {
       subscriptions.push(cb);
       return subscriptions.length - 1;
     },
-    unsubscribe: sid => subscriptions.splice(sid, 1),
+    unsubscribe: (sid) => subscriptions.splice(sid, 1),
     play: (vid, spn, time = 0, cb) =>
       source({
         ...voices[vid](spn),
         start: time,
-        cb
+        cb,
       }),
-    schedule: events => {
-      voicebox.cancel();
-      const startTime = events.length && events[0].time;
+    schedule: (events) => {
+      //      voicebox.cancel();
+      const startTime = events.length ? events[0].time : 0;
       const lead = _scoreTempo * 2;
-      _scheduled = events.map(({ vid, spn, time, cb }, idx) => {
+      _scheduled = events.map((event, idx) => {
+        const { vid, spn, time, cb } = event;
         const next = idx ? ((time - startTime) * _tempo) / _scoreTempo : 0;
         return [
           voicebox.play(vid, spn, next + lead),
-          source({ cb, stop: next + lead })
+          source({ cb: () => cb(event), stop: next + lead }),
         ];
       });
       voicebox.time = startTime - lead;
     },
-    cancel: time => {
+    cancel: () => {
       _scheduled.forEach(([s, d]) => {
         s.disconnect();
         d.onended = undefined;
       });
-      voicebox.time = time;
-    }
+    },
   };
   return voicebox;
 };

@@ -49,25 +49,81 @@ label {
   display: block;
 }
 
-#channels::-webkit-scrollbar {
+#sketch::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
 }
 
-#channels {
+#sketch {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  width: 100%;
+  width: 90%;
+  margin: 0 auto;
   overflow-x: scroll;
-  padding: 10px 20px 30px;
+  height: 50px;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
 }
 
-.channel {
+.bar {
   text-overflow: ellipsis;
   white-space: nowrap;
+  border-left: black solid 1px;
 }
-.channel span {
+.voice {
   padding: 3px;
   cursor: pointer;
+  display: flex;
+}
+
+.note {
+  cursor: pointer;
+}
+
+.t-16 {
+  padding-right: 1px;
+}
+.t-8 {
+  padding-right: 2px;
+}
+.t-8t {
+  padding-right: 1px;
+}
+.t-d8 {
+  padding-right: 3px;
+}
+.t-4 {
+  padding-right: 8px;
+}
+.t-4t {
+  padding-right: 2px;
+}
+.t-d4 {
+  padding-right: 12px;
+}
+.t-2 {
+  padding-right: 16px;
+}
+.t-2t {
+  padding-right: 5px;
+}
+.t-d2 {
+  padding-right: 24px;
+}
+.t-1 {
+  padding-right: 32px;
+}
+.t-1t {
+  padding-right: 10px;
+}
+.t-d1 {
+  padding-right: 56px;
+}
+#channel-bar {
+  position: relative;
+  left: -20px;
+  border-bottom: 3px solid black;
+  padding: 3px;
 }
 
 @keyframes blink-0 {

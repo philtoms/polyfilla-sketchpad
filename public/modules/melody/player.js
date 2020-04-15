@@ -1,92 +1,106 @@
-import { select, note } from './notes.js';
+import { select } from './notes.js';
 import client from '../utils/client.js';
-import { draw } from '../utils/touch.js';
 
-const emptyChannels = {
-  0: [],
-  1: [],
-  2: [],
-};
-
-let previousEvent = {};
-let lastTime = 0;
-let nextBeat = 0;
+let previousNote = '';
+let nextNote = 0;
+let nextBar = 0;
+let nextTime = null;
 
 export default (context) => {
   const { batch } = client(context);
-  const play = (channel, touch) => {
+  const play = (vid, touch) => {
     const { voicebox } = context.value;
+    if (nextTime === null) {
+      nextTime = 0;
+      voicebox.time = nextTime;
+    }
     const name = select(touch.pageX, touch.pageY).name;
-    if (name && name !== previousEvent.name) {
-      previousEvent = register(channel, name, touch);
-      voicebox.play(0, name);
-      return previousEvent;
+    if (name && name !== previousNote) {
+      previousNote = name;
+      voicebox.play(vid, name);
+      return register(vid, name, touch);
     }
   };
 
-  const stop = (touch) => {
-    if (previousEvent.touch) {
-      // const { draw = () => {} } = context.value;
-      // draw({ ...previousEvent.touch, paintType: 'fill' });
-      previousEvent = {};
-    }
+  const stop = () => {
+    previousNote = '';
   };
 
-  const register = (channel, name, touch) => {
-    const { voicebox, data, quantize } = context.value;
-    if (!lastTime) {
-      lastTime = data.length ? data[data.length - 1].time : 0;
-    }
-    let time = voicebox.nextTime(lastTime);
-    if (time < lastTime) {
-      time = data[nextBeat].time;
-      voicebox.cancel(time);
-      const events = data.filter(({ time: etime }) => etime < time);
-      data.splice(0, data.length, ...events);
-    }
-    const idx = data.length;
-    const event = {
-      idx,
-      channel,
+  const register = (vid, name, touch) => {
+    const { voicebox, quantize, data } = context.value;
+    let time = voicebox.time;
+    const [bid, nid] = quantize(nextBar, vid, time, {
       name,
       time,
+      nid: nextNote++,
       touch: {
         pageX: touch.pageX,
         pageY: touch.pageY,
       },
+    });
+    if (bid !== nextBar) {
+      nextBar = bid;
+      nextNote = nid + 1;
+      voicebox.time = data.bars[bid][vid].notes[nid].time;
+    }
+    batch(data.bars[bid][vid]);
+    return [bid, nid];
+  };
+
+  const playback = (startpoint, count = 1, draw) => {
+    const {
+      voicebox,
+      score: { tempo, signature },
+      data: { voices, bars },
+    } = context.value;
+    voicebox.cancel();
+
+    const bid = Math.max(0, startpoint - 1);
+
+    nextBar = startpoint;
+    const [bar] = signature.split('/');
+    const tbar = (bar * 60) / tempo;
+
+    const playloop = (loop = 2) => {
+      const cb = ({ bid, idx, start, touch }) => {
+        draw(touch);
+        nextBar = bid;
+        if (start) {
+          nextNote = 0;
+          voicebox.time = 0;
+        }
+        if (idx === lastIdx && loop) {
+          setTimeout(() => playloop(loop - 1), 1000);
+        }
+      };
+      let lastIdx = 0;
+      voicebox.schedule(
+        bars.slice(bid, bid + count + 2).reduce(
+          (acc, bar, bid) =>
+            acc.concat(
+              Object.values(voices).reduce(
+                (acc, vid) =>
+                  acc.concat(
+                    bar[vid].notes.map((note) => ({
+                      time: tbar * bid + note.time,
+                      spn: note.name,
+                      bid,
+                      vid,
+                      start: bid === startpoint && note.nid === 0,
+                      idx: ++lastIdx,
+                      touch: note.touch,
+                      cb,
+                    }))
+                  ),
+                []
+              )
+            ),
+          []
+        )
+      );
     };
-    data.push({ ...emptyChannels, time, [channel]: event });
-    quantize(idx);
-    batch(data[idx][channel]);
-    lastTime = time;
-    return data[idx][channel];
+    playloop(2);
   };
-
-  const playback = (startpoint, channel = 0) => {
-    const { voicebox, data, drawCtx } = context.value;
-    const channels = [].concat(channel);
-    const redraw = draw(drawCtx);
-    nextBeat = startpoint;
-    voicebox.schedule(
-      data.slice(startpoint).reduce(
-        (acc, event) =>
-          acc.concat(
-            channels.map((channel) => ({
-              time: event[channel].time,
-              spn: event[channel].name,
-              vid: channel,
-              cb: () => {
-                nextBeat = event[channel].idx + 1;
-                const { pos } = note(event[channel].name);
-                redraw({ pageX: event[channel].touch.pageX, pageY: pos });
-              },
-            }))
-          ),
-        []
-      )
-    );
-  };
-
   return {
     play,
     stop,
