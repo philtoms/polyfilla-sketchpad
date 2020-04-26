@@ -26,12 +26,13 @@ export default (context) => {
       }, 1000);
     },
     render() {
-      const { bvn, voicebox, data, drawCtx } = useContext(context);
+      const { bvn, voicebox, data, drawCtx, score } = useContext(context);
       this.voicebox = voicebox;
       this.drawCtx = drawCtx;
       if (bvn && bvn !== this.bvn) {
         this.bvn = bvn;
         const [bid, nid] = bvn;
+        const beats = score.signature.split('/').shift();
         let elBar = document.getElementById(`b-${bid}`);
         if (!elBar) {
           this.element.innerHTML += `<div class="bar" id="b-${bid}"></div>`;
@@ -45,7 +46,12 @@ export default (context) => {
               note.nid
             }">${note.name}</div>`,
           ''
-        )}</div>`;
+        )}<div class="tempo-${beats}">${[1, 2, 3, 4]
+          .slice(0, beats)
+          .reduce(
+            (acc, beat) => `${acc}<div class="beat beat-${beat}"></div>`,
+            ''
+          )}</div></div>`;
         document.getElementById(`n-${bid}-${0}-${nid}`).scrollIntoView();
       }
       if (data != this.data) {

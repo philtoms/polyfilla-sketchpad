@@ -61,19 +61,18 @@ export default (context) => {
     const [bar] = signature.split('/');
     const tbar = (bar * 60) / tempo;
 
+    const cb = ({ bid, last, first, touch, loop }) => {
+      draw(touch);
+      nextBar = bid;
+      if (first) {
+        nextNote = 0;
+        voicebox.time = 0;
+      }
+      if (last && loop) {
+        setTimeout(() => playloop(loop - 1), 1000);
+      }
+    };
     const playloop = (loop = 2) => {
-      const cb = ({ bid, idx, start, touch }) => {
-        draw(touch);
-        nextBar = bid;
-        if (start) {
-          nextNote = 0;
-          voicebox.time = 0;
-        }
-        if (idx === lastIdx && loop) {
-          setTimeout(() => playloop(loop - 1), 1000);
-        }
-      };
-      let lastIdx = 0;
       voicebox.schedule(
         bars.slice(bid, bidEnd).reduce(
           (acc, bar, bid) =>
@@ -86,9 +85,8 @@ export default (context) => {
                       spn: note.name,
                       bid,
                       vid,
-                      start: bid === startpoint && note.nid === 0,
-                      idx: ++lastIdx,
                       touch: note.touch,
+                      loop,
                       cb,
                     }))
                   ),

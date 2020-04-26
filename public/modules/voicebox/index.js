@@ -2,10 +2,10 @@ import Voice from './voice.js';
 import Source from './source.js';
 
 export default (options) => {
-  const subscriptions = [];
   const ctx = new (window.AudioContext || window.webkitAudioContext)(options);
   const source = Source(ctx);
 
+  let _subscriptions = [];
   let _tempo = 60 / 120;
   let _scoreTempo = _tempo;
   let _beats = 4;
@@ -27,7 +27,7 @@ export default (options) => {
     const clock = () => {
       source({ cb: clock, stop: _tempo });
       const tick = _ticks++ % _beats;
-      subscriptions.forEach((cb) => cb(tick));
+      _subscriptions.forEach((cb) => cb(tick));
     };
     clock();
     return ctx;
@@ -63,10 +63,21 @@ export default (options) => {
       return voicebox.time;
     },
     subscribe: (cb) => {
-      subscriptions.push(cb);
-      return subscriptions.length - 1;
+      _subscriptions.push(cb);
     },
-    unsubscribe: (sid) => subscriptions.splice(sid, 1),
+    unsubscribe: (cb) => {
+      _subscriptions = _subscriptions.filter((s) => s !== cb);
+    },
+    count: (cb, count = 1) => {
+      voicebox.subscribe((tick) => {
+        if (!tick) {
+          if (--count === 0) {
+            voicebox.unsubscribe(cb);
+            cb(args);
+          }
+        }
+      });
+    },
     play: (vid, spn, time = 0, cb) =>
       source({
         ...voices[vid](spn),
@@ -81,7 +92,15 @@ export default (options) => {
         const next = ((time - startTime) * _tempo) / _scoreTempo;
         return [
           voicebox.play(vid, spn, next + lead),
-          source({ cb: () => cb(event), stop: next + lead }),
+          source({
+            cb: () =>
+              cb({
+                ...event,
+                first: idx === 0,
+                last: idx === events.length - 1,
+              }),
+            stop: next + lead,
+          }),
         ];
       });
       voicebox.time = startTime - lead;
