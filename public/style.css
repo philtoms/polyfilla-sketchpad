@@ -133,7 +133,7 @@ label {
   padding: 3px;
 }
 
-@keyframes blink-0 {
+@keyframes blink-true {
   from {
     opacity: 0;
   }
@@ -141,7 +141,7 @@ label {
     opacity: 0.5;
   }
 }
-@keyframes blink-1 {
+@keyframes blink-false {
   from {
     opacity: 0;
   }
@@ -152,11 +152,11 @@ label {
 #metronome {
   opacity: 0;
 }
-#metronome.blink-0 {
-  animation: blink-0 0.5s;
+#metronome.blink-true {
+  animation: blink-true 0.5s;
 }
-#metronome.blink-1 {
-  animation: blink-1 0.5s;
+#metronome.blink-false {
+  animation: blink-false 0.5s;
 }
 #metronome.tick-0:after {
   content: '1';
@@ -197,7 +197,7 @@ canvas {
   width: 100%;
   height: 100%;
 }
-#bars {
+#staves {
   z-index: 1;
 }
 #touch {

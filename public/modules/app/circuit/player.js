@@ -1,6 +1,6 @@
-import { select } from './notes.js';
-import quantize from './quantize.js';
-import voicebox from './voicebox.js';
+import { select } from '../../melody/notes.js';
+import quantize from '../../melody/quantize.js';
+import voicebox from '../voicebox.js';
 
 import client from '../../utils/client.js';
 

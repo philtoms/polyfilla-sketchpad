@@ -4,10 +4,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Polyfiller Sketchpad</title>
+    <title value="{$title}">Polyfiller Sketchpad</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="A cool thing made with Glitch" />
+    <meta name="description" content="A cool thing made with dom-circuit" />
     <!-- <link
       id="favicon"
       rel="icon"
@@ -17,8 +17,6 @@
 
     <!-- import the webpage's stylesheet -->
     <link rel="stylesheet" href="/style.css" />
-    <script src="/hooked-elements.js"></script>
-    <!-- <script src="/script.js"></script> -->
     <script type="module" src="/index.js" defer></script>
   </head>
   <body>
@@ -26,19 +24,19 @@
       <section id="intro">
         <h1>Polyfiller Sketchpad</h1>
         <form>
-          <input id="title" value="${title}" />
+          <input id="title" />
           <div id="dynamics">
             <select id="signature">
               <option>4/4</option>
               <option>3/4</option>
             </select>
             <input
+              id="tempo"
               type="range"
               min="20"
               max="240"
               step="5"
               value="120"
-              id="tempo"
             />
             <label for="tempo">120</label>
           </div>
@@ -48,16 +46,14 @@
         </form>
       </section>
       <div id="metronome"></div>
-      <div id="sketch">
-        <div id="score"></div>
-      </div>
-      <section id="compose">
+      <div id="score"></div>
+      <section id="canvas">
         <!-- <div id="controls">
           <button id="quantize" type="button">Quantize</button>
           <button id="clear" type="button">Clear data</button>
         </div> -->
         <canvas id="touch"></canvas>
-        <canvas id="bars"></canvas>
+        <canvas id="staves"></canvas>
       </section>
     </main>
   </body>

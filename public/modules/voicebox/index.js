@@ -112,5 +112,8 @@ export default (options) => {
       });
     },
   };
+  if (options.samples) {
+    voicebox.create(0, options.samples);
+  }
   return voicebox;
 };

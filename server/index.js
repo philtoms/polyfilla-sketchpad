@@ -8,6 +8,7 @@ import sketch from './sketch';
 const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(express.static('assets'));
+app.use('/node_modules', express.static('node_modules'));
 app.use('/', express.static('public'));
 
 app.get('/data', data.download);
