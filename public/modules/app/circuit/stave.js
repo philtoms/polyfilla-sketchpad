@@ -1,4 +1,25 @@
-import { playback } from '../../melody/player.js';
+const bar = (el, bid, bar, score) => {
+  const beats = score.signature.split('/').shift();
+  let elBar = document.getElementById(`b-${bid}`);
+  if (!elBar) {
+    el.innerHTML += `<div class="bar" id="b-${bid}"></div>`;
+    elBar = document.getElementById(`b-${bid}`);
+  }
+  elBar.innerHTML = score.voices.reduce(
+    (acc, voice, vid) =>
+      `${acc}<div class="voice" id="v-${vid}-${0}">${bar[vid].notes.reduce(
+        (acc, note) =>
+          `${acc}<div class="note t-${note.duration[0]}" id="n-${bid}-${vid}-${note.nid}">${note.name}</div>`,
+        ''
+      )}<div class="tempo-${beats}">${[1, 2, 3, 4]
+        .slice(0, beats)
+        .reduce(
+          (acc, beat) => `${acc}<div class="beat beat-${beat}"></div>`,
+          ''
+        )}</div></div>`,
+    ''
+  );
+};
 
 export default {
   $init(acc) {
@@ -6,14 +27,6 @@ export default {
       (acc, el, channel) => ({ ...acc, [channel]: el }),
       {}
     );
-    const { data, stave } = acc;
-    this.el.innerHTML = data.bars.filter(Boolean).reduce((acc, data) => {
-      // todo apply all voices
-      const voice = 0;
-      const { name, idx } = data[voice];
-      const noteId = `${voice}-${idx}`;
-      return `${acc}<span id="${noteId}" class="event"> ${name} </span>`;
-    }, '');
     return {
       ...acc,
       stave: {
@@ -23,22 +36,22 @@ export default {
       },
     };
   },
-  start: ({ voicebox }) => {
-    voicebox.init();
-  },
+
   $click(acc, e) {
     e.preventDefault();
 
-    const {
+    let {
       stave: { selectHandle, barCount },
     } = acc;
-    const startPoint = e.target.id.split('-')[1];
+
+    const startPoint = e.target.id.split('-')[1] || 0;
     clearTimeout(selectHandle);
     barCount = (barCount % 3) + 1;
     selectHandle = setTimeout(() => {
-      // signal an internal state change
-      const { drawCtx } = this.signal('/state/touch');
-      playback(parseInt(startPoint), barCount, drawCtx);
+      this.signal('/player/playback', {
+        startPoint: parseInt(startPoint),
+        count: barCount,
+      });
       barCount = 0;
     }, 1000);
 
@@ -51,28 +64,14 @@ export default {
       },
     };
   },
-  '$/bvn'({ key, data }, bvn) {
+  '$/player/data'(acc, { bars, score }) {
+    bars.forEach((data, bid) => {
+      bar(this.el, bid, data, score);
+    });
+  },
+  '$/player/play'(acc, { bvn, data: { bars, score } }) {
     const [bid, nid] = bvn;
-    const beats = key;
-    let elBar = document.getElementById(`b-${bid}`);
-    if (!elBar) {
-      this.innerHTML += `<div class="bar" id="b-${bid}"></div>`;
-      elBar = document.getElementById(`b-${bid}`);
-    }
-    elBar.innerHTML = `<div class="voice" id="v-${bid}-${0}">${data.bars[
-      bid
-    ][0].notes.reduce(
-      (acc, note) =>
-        `${acc}<div class="note t-${note.duration[0]}" id="n-${bid}-${0}-${
-          note.nid
-        }">${note.name}</div>`,
-      ''
-    )}<div class="tempo-${beats}">${[1, 2, 3, 4]
-      .slice(0, beats)
-      .reduce(
-        (acc, beat) => `${acc}<div class="beat beat-${beat}"></div>`,
-        ''
-      )}</div></div>`;
+    bar(this.el, bid, bars[bid], score);
     document.getElementById(`n-${bid}-${0}-${nid}`).scrollIntoView();
   },
 };

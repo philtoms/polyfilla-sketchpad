@@ -7,16 +7,19 @@ const post = (data, root, path = '') =>
     body: JSON.stringify(data),
   });
 
-const batched = [];
+const batched = {};
 setInterval(() => {
-  if (batched.length) {
-    const [data, root] = batched.splice(0, Math.min(batched.length, 100));
-    post(data, root, 'batch');
-  }
+  Object.entries(batched).forEach(([root, batched]) => {
+    if (batched.length) {
+      const data = batched.splice(0, Math.min(batched.length, 100));
+      post(data, root, 'batch');
+    }
+  });
 }, 3000);
 
 const batch = (data, root) => {
-  batched.push([data, root]);
+  if (!batched[root]) batched[root] = [];
+  batched[root].push(data);
 };
 // .then(res => res.json())
 // .then(data => console.log(data)),

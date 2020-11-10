@@ -1,11 +1,18 @@
 import Voice from './voice.js';
 import Source from './source.js';
 
+let _subscriptions = [];
+export const subscribe = (cb) => {
+  _subscriptions.push(cb);
+};
+export const unsubscribe = (cb) => {
+  _subscriptions = _subscriptions.filter((s) => s !== cb);
+};
+
 export default (options) => {
   const ctx = new (window.AudioContext || window.webkitAudioContext)(options);
   const source = Source(ctx);
 
-  let _subscriptions = [];
   let _tempo = 60 / 120;
   let _scoreTempo = _tempo;
   let _beats = 4;
@@ -30,7 +37,7 @@ export default (options) => {
       _subscriptions.forEach((cb) => cb(tick));
     };
     clock();
-    return ctx;
+    return voicebox;
   };
 
   let baseTime = ctx.currentTime;
@@ -61,12 +68,6 @@ export default (options) => {
       // const time = voicebox.time;
       // if (time > lastTime + _tempo * _beats) voicebox.time = lastTime + _tempo;
       return voicebox.time;
-    },
-    subscribe: (cb) => {
-      _subscriptions.push(cb);
-    },
-    unsubscribe: (cb) => {
-      _subscriptions = _subscriptions.filter((s) => s !== cb);
     },
     count: (cb, count = 1) => {
       voicebox.subscribe((tick) => {

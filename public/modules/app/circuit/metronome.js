@@ -1,8 +1,10 @@
+import { subscribe } from '../../voicebox/index.js';
+
 export default {
-  $init({ voicebox }) {
+  $init() {
     let tick = '';
     let blink = true;
-    voicebox.subscribe((beat) => {
+    subscribe((beat) => {
       if (this.bin) {
         if (tick) {
           document.getElementsByClassName(tick)[0].classList.remove(tick);
@@ -13,7 +15,7 @@ export default {
       this.el.className = `${beat} blink-${!blink}`;
     });
   },
-  $state({ score: { bvn } }) {
-    this.bin = bvn.bin;
+  '$/player/play'(acc, { bvn }) {
+    this.bin = bvn[0];
   },
 };

@@ -1,40 +1,44 @@
-import { copy, draw, fade } from '../utils/touch.js';
+import { copy, draw, fade } from '../../../utils/touch.js';
+import { select } from '../../../melody/notes.js';
 
-export function $ontouchstart(acc, e) {
-  e.preventDefault();
-
-  const { ctxDraw, ctxCopy } = acc;
-  this.el.addEventListener('mousemove', mousemove, false);
-  const touch = ctxCopy((e.changedTouches || [e])[0], 'fill');
-  const bvn = this.signal('/player/play', touch.channel, touch);
+const touchDraw = ({ ctxDraw, ctxCopy }, touches, fill = '') => {
+  const touch = ctxCopy(touches, fill);
   ctxDraw(touch);
-  return { ...acc, bvn };
+  const name = select(touch.pageX, touch.pageY).name;
+  if (name) {
+    return { name, vid: touch.channel, touch };
+  }
+};
+
+function $touchstart(acc, e) {
+  e.preventDefault();
+  return {
+    ...acc,
+    ...touchDraw(acc, (e.changedTouches || [e])[0], 'fill'),
+    draw: true,
+  };
 }
 
-export function $ontouchmove(acc, e) {
+function $touchmove(acc, e) {
   e.preventDefault();
-
-  const { ctxDraw, ctxCopy } = acc;
-  const touch = ctxCopy((e.changedTouches || [e])[0]);
-  const bvn = this.signal('/player/play', touch.channel, touch);
-  ctxDraw(touch);
-  return { ...acc, bvn };
+  if (acc.draw) {
+    return {
+      ...acc,
+      ...touchDraw(acc, (e.changedTouches || [e])[0]),
+    };
+  }
 }
 
-export function $ontouchend(acc, e) {
+function $touchend(acc, e) {
   e.preventDefault();
-
   const { ctxCopy } = acc;
   const touch = ctxCopy((e.changedTouches || [e])[0]);
-  this.el.removeEventListener('mousemove', mousemove);
-  this.signal('/player/stop', touch);
+  return { ...acc, touch, draw: false };
 }
-
-const mousemove = $ontouchmove;
 
 export default {
   $state(acc) {
-    const {
+    let {
       backdrop: { noteRange },
       ctxDraw,
       ctxCopy,
@@ -55,9 +59,19 @@ export default {
     }
     return { ...acc, ctxDraw, ctxCopy };
   },
-  $ontouchstart,
-  $ontouchmove,
-  $ontouchend,
-  $onmousedown: $ontouchstart,
-  $onmouseup: $ontouchend,
+  $draw: ({ ctxDraw }, touch) => {
+    ctxDraw(touch);
+  },
+  $touchstart,
+  $touchmove,
+  $touchend,
+  $mousedown(acc, e) {
+    return this.signal('./touchstart', e);
+  },
+  $mouseup(acc, e) {
+    return this.signal('./touchend', e);
+  },
+  $mousemove(acc, e) {
+    return this.signal('./touchmove', e);
+  },
 };

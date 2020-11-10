@@ -1,7 +1,7 @@
-import { setRange, scale, color, select } from '../melody/notes.js';
+import { setRange, scale, color, select } from '../../../melody/notes.js';
 
 export default {
-  $init(state) {
+  $state(acc) {
     const { el } = this;
     const noteRange = setRange(
       el.parentElement.clientWidth,
@@ -31,6 +31,6 @@ export default {
     //   ctx.strokeStyle = `rgba(0,0,0,${i / 10})`;
     //   ctx.stroke();
     // }
-    return { ...state, noteRange };
+    return { ...acc, backdrop: { noteRange } };
   },
 };

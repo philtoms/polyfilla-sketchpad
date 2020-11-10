@@ -4,7 +4,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title value="{$title}">Polyfiller Sketchpad</title>
+    <title>Polyfiller Sketchpad</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="A cool thing made with dom-circuit" />
@@ -24,7 +24,7 @@
       <section id="intro">
         <h1>Polyfiller Sketchpad</h1>
         <form>
-          <input id="title" />
+          <input id="title" value="${title}" />
           <div id="dynamics">
             <select id="signature">
               <option>4/4</option>
@@ -46,15 +46,14 @@
         </form>
       </section>
       <div id="metronome"></div>
-      <div id="score"></div>
-      <section id="canvas">
+      <div id="stave"></div>
+      <section id="compose">
         <!-- <div id="controls">
           <button id="quantize" type="button">Quantize</button>
           <button id="clear" type="button">Clear data</button>
         </div> -->
         <canvas id="touch"></canvas>
-        <canvas id="staves"></canvas>
-      </section>
-    </main>
+        <canvas id="backdrop"></canvas>
+     </main>
   </body>
 </html>

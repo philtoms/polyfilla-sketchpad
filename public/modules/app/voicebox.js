@@ -13,4 +13,4 @@ const samples = {
   A7: `${assets}A7.mp3`,
 };
 
-export default voicebox(samples);
+export default voicebox({ samples });
