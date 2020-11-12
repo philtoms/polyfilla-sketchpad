@@ -1,4 +1,4 @@
-import { subscribe } from '../../voicebox/index.js';
+import { subscribe } from '../voicebox/index.js';
 
 export default {
   $init() {

@@ -1,5 +1,5 @@
-import { copy, draw, fade } from '../../../utils/touch.js';
-import { select } from '../../../melody/notes.js';
+import { copy, draw, fade } from '../../utils/touch.js';
+import { select } from '../../utils/notes.js';
 
 const touchDraw = ({ ctxDraw, ctxCopy }, touches, fill = '') => {
   const touch = ctxCopy(touches, fill);

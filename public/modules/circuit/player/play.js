@@ -1,4 +1,4 @@
-import client from '../../../utils/client.js';
+import client from '../../utils/client.js';
 
 export function start(acc, value) {
   return { ...this.signal('./play', value), start: true };

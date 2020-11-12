@@ -1,4 +1,4 @@
-import voicebox from '../../voicebox.js';
+import voicebox from '../../utils/voicebox.js';
 
 export { start, play, stop } from './play.js';
 export { playback } from './playback.js';

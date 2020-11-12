@@ -1,4 +1,4 @@
-import { setRange, scale, color, select } from '../../../melody/notes.js';
+import { setRange, scale, color, select } from '../../utils/notes.js';
 
 export default {
   $state(acc) {

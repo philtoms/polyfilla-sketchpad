@@ -1,17 +1,11 @@
 import circuit from '/node_modules/dom-circuit/index.js';
 
-import metronome from './circuit/metronome.js';
-import player, {
-  go,
-  start,
-  play,
-  stop,
-  playback,
-} from './circuit/player/index.js';
-import stave from './circuit/stave.js';
-import autograph, { title, tempo, timeSignature } from './circuit/autograph.js';
-import touch from './circuit/canvas/touch-area.js';
-import backdrop from './circuit/canvas/touch-backdrop.js';
+import autograph, { title, tempo, timeSignature } from './autograph.js';
+import stave from './stave.js';
+import metronome from './metronome.js';
+import touch from './canvas/touch-area.js';
+import backdrop from './canvas/touch-backdrop.js';
+import player, { go, start, play, stop, playback } from './player/index.js';
 
 export default () =>
   circuit({
@@ -24,6 +18,7 @@ export default () =>
 
     stave,
     metronome,
+
     'compose$/player/go': {
       $state() {
         this.el.className = 'compose';

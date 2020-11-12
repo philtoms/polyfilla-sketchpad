@@ -1,5 +1,5 @@
-import client from '../../utils/client.js';
-import quantize from '../../melody/quantize.js';
+import client from '../utils/client.js';
+import quantize from '../utils/quantize.js';
 
 export const title = {
   $init(acc) {
