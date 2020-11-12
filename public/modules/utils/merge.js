@@ -6,8 +6,8 @@ const merge = (value, state = {}) =>
         ? v
         : typeof v === 'object'
         ? { ...acc[k], ...merge(acc[k], v) }
-        : v
+        : v,
     }),
-    value
+    value || {}
   );
 export default merge;

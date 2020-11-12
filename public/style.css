@@ -49,28 +49,91 @@ label {
   display: block;
 }
 
-#channels::-webkit-scrollbar {
+#sketch::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
 }
 
-#channels {
+#sketch {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  width: 100%;
+  width: 40%;
+  margin: 0 auto;
   overflow-x: scroll;
-  padding: 10px 20px 30px;
+  height: 50px;
+  padding: 10px;
 }
 
-.channel {
-  text-overflow: ellipsis;
+#stave {
   white-space: nowrap;
 }
-.channel span {
+
+.bar {
+  border-left: black solid 1px;
+  display: inline-block;
+  min-width: 40px;
+}
+
+.bar:last-child {
+  border-right: black solid 1px;
+}
+
+.voice {
   padding: 3px;
   cursor: pointer;
 }
 
-@keyframes blink-0 {
+.note {
+  cursor: pointer;
+  display: inline-block;
+}
+
+.t-16 {
+  padding-right: 1px;
+}
+.t-8 {
+  padding-right: 2px;
+}
+.t-8t {
+  padding-right: 1px;
+}
+.t-d8 {
+  padding-right: 3px;
+}
+.t-4 {
+  padding-right: 8px;
+}
+.t-4t {
+  padding-right: 2px;
+}
+.t-d4 {
+  padding-right: 12px;
+}
+.t-2 {
+  padding-right: 16px;
+}
+.t-2t {
+  padding-right: 5px;
+}
+.t-d2 {
+  padding-right: 24px;
+}
+.t-1 {
+  padding-right: 32px;
+}
+.t-1t {
+  padding-right: 10px;
+}
+.t-d1 {
+  padding-right: 56px;
+}
+#channel-bar {
+  position: relative;
+  left: -20px;
+  border-bottom: 3px solid black;
+  padding: 3px;
+}
+
+@keyframes blink-true {
   from {
     opacity: 0;
   }
@@ -78,7 +141,7 @@ label {
     opacity: 0.5;
   }
 }
-@keyframes blink-1 {
+@keyframes blink-false {
   from {
     opacity: 0;
   }
@@ -89,11 +152,11 @@ label {
 #metronome {
   opacity: 0;
 }
-#metronome.blink-0 {
-  animation: blink-0 0.5s;
+#metronome.blink-true {
+  animation: blink-true 0.5s;
 }
-#metronome.blink-1 {
-  animation: blink-1 0.5s;
+#metronome.blink-false {
+  animation: blink-false 0.5s;
 }
 #metronome.tick-0:after {
   content: '1';
@@ -108,6 +171,25 @@ label {
   content: '+';
 }
 
+.tempo-4 .beat {
+  width: 25%;
+}
+
+.tempo-3 .beat {
+  width: 33%;
+}
+
+.beat {
+  display: inline-block;
+}
+
+.tick-1 .beat-1,
+.tick-2 .beat-2,
+.tick-3 .beat-3,
+.tick-4 .beat-4 {
+  border: 1px solid blue;
+}
+
 canvas {
   position: absolute;
   top: 0;
@@ -115,7 +197,7 @@ canvas {
   width: 100%;
   height: 100%;
 }
-#bars {
+#staves {
   z-index: 1;
 }
 #touch {
