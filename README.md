@@ -34,7 +34,7 @@ PI is not an exercise in hiding complexity. On the contrary, the methodology und
     score
       title
       tempo
-      signature
+      timeSignature
       stave
 
     canvas

@@ -20,28 +20,28 @@ export const tempo = {
   },
 };
 
-export const signature = {
+export const timeSignature = {
   $init(acc) {
-    return { ...acc, signature: this.el.value };
+    return { ...acc, timeSignature: this.el.value };
   },
-  $input: (acc, { target: { value } }) => ({ ...acc, signature: value }),
+  $input: (acc, { target: { value } }) => ({ ...acc, timeSignature: value }),
 };
 
 export default {
   $init(acc) {
-    client.get(acc.score.title).then((data) => {
-      const score = {
-        ...acc.score,
-        ...data.score,
+    client.get(acc.autograph.title).then((data) => {
+      const autograph = {
+        ...acc.autograph,
+        ...data.autograph,
       };
       this.signal('/player/data', {
         ...data,
-        score,
-        quantize: quantize(acc.score, data),
+        autograph,
+        quantize: quantize(acc.autograph, data),
       });
       return {
         ...acc,
-        score,
+        autograph,
       };
     });
   },

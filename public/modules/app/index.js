@@ -9,17 +9,17 @@ import player, {
   playback,
 } from './circuit/player/index.js';
 import stave from './circuit/stave.js';
-import score, { title, tempo, signature } from './circuit/score.js';
+import autograph, { title, tempo, timeSignature } from './circuit/autograph.js';
 import touch from './circuit/canvas/touch-area.js';
 import backdrop from './circuit/canvas/touch-backdrop.js';
 
 export default () =>
   circuit({
-    score: {
+    autograph: {
       '#title': title,
       tempo,
-      signature,
-      ...score,
+      timeSignature,
+      ...autograph,
     },
 
     stave,

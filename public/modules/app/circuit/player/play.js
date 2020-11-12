@@ -40,7 +40,7 @@ export const play = (acc, { vid, touch, name }) => {
       nextNote = nid + 1;
       voicebox.time = data.bars[bid][vid].notes[nid].time;
     }
-    client.batch(data.bars[bid][vid], data.score.title);
+    client.batch(data.bars[bid][vid], data.autograph.title);
     return {
       ...acc,
       play: {

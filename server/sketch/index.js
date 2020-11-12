@@ -11,7 +11,7 @@ const emptyVoices = {
 const emptySketch = (data, title) =>
   data.insert(title, {
     score: {
-      signature: '4/4',
+      timeSignature: '4/4',
       tempo: 120,
       voices: ['lead'],
     },

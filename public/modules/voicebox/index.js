@@ -23,7 +23,7 @@ export default (options) => {
   const init = (options) => {
     voicebox.tempo = options.tempo;
     _scoreTempo = _tempo;
-    voicebox.signature = options.signature;
+    voicebox.timeSignature = options.timeSignature;
     try {
       source();
     } catch (e) {}
@@ -57,10 +57,10 @@ export default (options) => {
     set tempo(value) {
       _tempo = 60 / value;
     },
-    get signature() {
+    get timeSignature() {
       return [_beats, _noteValue];
     },
-    set signature(value) {
+    set timeSignature(value) {
       _beats = parseInt(value.split('/')[0]);
       _noteValue = 1 / parseInt(value.split('/')[1]);
     },

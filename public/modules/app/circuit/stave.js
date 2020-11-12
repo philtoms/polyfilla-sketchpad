@@ -1,11 +1,11 @@
-const bar = (el, bid, bar, score) => {
-  const beats = score.signature.split('/').shift();
+const bar = (el, bid, bar, autograph) => {
+  const [beats] = autograph.timeSignature.split('/');
   let elBar = document.getElementById(`b-${bid}`);
   if (!elBar) {
     el.innerHTML += `<div class="bar" id="b-${bid}"></div>`;
     elBar = document.getElementById(`b-${bid}`);
   }
-  elBar.innerHTML = score.voices.reduce(
+  elBar.innerHTML = autograph.voices.reduce(
     (acc, voice, vid) =>
       `${acc}<div class="voice" id="v-${vid}-${0}">${bar[vid].notes.reduce(
         (acc, note) =>
@@ -64,14 +64,14 @@ export default {
       },
     };
   },
-  '$/player/data'(acc, { bars, score }) {
+  '$/player/data'(acc, { bars, autograph }) {
     bars.forEach((data, bid) => {
-      bar(this.el, bid, data, score);
+      bar(this.el, bid, data, autograph);
     });
   },
-  '$/player/play'(acc, { bvn, data: { bars, score } }) {
+  '$/player/play'(acc, { bvn, data: { bars, autograph } }) {
     const [bid, nid] = bvn;
-    bar(this.el, bid, bars[bid], score);
+    bar(this.el, bid, bars[bid], autograph);
     document.getElementById(`n-${bid}-${0}-${nid}`).scrollIntoView();
   },
 };

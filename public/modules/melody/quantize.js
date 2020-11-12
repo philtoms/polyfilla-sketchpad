@@ -11,8 +11,8 @@ const BIGTIME = Number.MAX_VALUE;
     t1=2         1         2         4         5
 
 */
-export default ({ tempo, signature }, data) => {
-  const [bar, beat] = signature.split('/');
+export default ({ tempo, timeSignature }, data) => {
+  const [bar, beat] = timeSignature.split('/');
   const tbar = (bar * 60) / tempo;
   const tbar2 = tbar + tbar;
   const tbeat = tbar / bar;

@@ -3,7 +3,7 @@ export function playback(acc, { startPoint, count = 1 }) {
     play,
     data: {
       bars,
-      score: { tempo, signature, voices },
+      autograph: { tempo, timeSignature, voices },
     },
     voicebox,
   } = acc;
@@ -13,8 +13,8 @@ export function playback(acc, { startPoint, count = 1 }) {
   const bid = Math.max(0, startPoint - 1);
   const bidEnd = startPoint ? bid + count + 2 : bid + count;
   play.nextBar = startPoint;
-  const [bar] = signature.split('/');
-  const tbar = (bar * 60) / tempo;
+  const [beats] = timeSignature.split('/');
+  const tbeats = (beats * 60) / tempo;
 
   const cb = ({ bid, last, first, touch, loop }) => {
     this.signal('/compose/touch/draw', touch);
@@ -36,7 +36,7 @@ export function playback(acc, { startPoint, count = 1 }) {
               (acc, voice, vid) =>
                 acc.concat(
                   bar[vid].notes.map((note) => ({
-                    time: tbar * bid + note.time,
+                    time: tbeats * bid + note.time,
                     spn: note.name,
                     bid,
                     vid,
