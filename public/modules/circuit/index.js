@@ -10,7 +10,7 @@ import player, { go, start, play, stop, playback } from './player/index.js';
 export default () =>
   circuit({
     autograph: {
-      '#title': title,
+      title,
       tempo,
       timeSignature,
       ...autograph,

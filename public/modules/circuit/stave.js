@@ -39,30 +39,8 @@ export default {
 
   $click(acc, e) {
     e.preventDefault();
-
-    let {
-      stave: { selectHandle, barCount },
-    } = acc;
-
-    const startPoint = e.target.id.split('-')[1] || 0;
-    clearTimeout(selectHandle);
-    barCount = (barCount % 3) + 1;
-    selectHandle = setTimeout(() => {
-      this.signal('/player/playback', {
-        startPoint: parseInt(startPoint),
-        count: barCount,
-      });
-      barCount = 0;
-    }, 1000);
-
-    return {
-      ...acc,
-      stave: {
-        ...acc.stave,
-        barCount,
-        selectHandle,
-      },
-    };
+    const startPoint = parseInt(e.target.id.split('-')[1] || 0);
+    this.signal('/player/playback', { startPoint });
   },
   '$/player/data'(acc, { bars, autograph }) {
     bars.forEach((data, bid) => {

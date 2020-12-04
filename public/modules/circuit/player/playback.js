@@ -1,4 +1,4 @@
-export function playback(acc, { startPoint, count = 1 }) {
+export function playback(acc, { startPoint }) {
   const {
     play,
     data: {
@@ -8,10 +8,10 @@ export function playback(acc, { startPoint, count = 1 }) {
     voicebox,
   } = acc;
 
-  voicebox.cancel();
+  this.count = ((this.count || 0) % 3) + 1;
 
   const bid = Math.max(0, startPoint - 1);
-  const bidEnd = startPoint ? bid + count + 2 : bid + count;
+  const bidEnd = startPoint ? bid + this.count + 2 : bid + this.count;
   play.nextBar = startPoint;
   const [beats] = timeSignature.split('/');
   const tbeats = (beats * 60) / tempo;
@@ -27,6 +27,7 @@ export function playback(acc, { startPoint, count = 1 }) {
       setTimeout(() => playloop(loop - 1), 1000);
     }
   };
+
   const playloop = (loop = 2) => {
     voicebox.schedule(
       bars.slice(bid, bidEnd).reduce(
@@ -52,5 +53,11 @@ export function playback(acc, { startPoint, count = 1 }) {
       )
     );
   };
-  playloop(2);
+
+  voicebox.cancel();
+  clearTimeout(this.nextHandle);
+  this.nextHandle = setTimeout(() => {
+    playloop(2);
+    this.count = 0;
+  }, 1000);
 }
