@@ -1,7 +1,8 @@
 import client from '../../utils/client.js';
 
 export function start(acc, value) {
-  return { ...this.signal('./play', value), start: true };
+  // toggle state change
+  return { ...play(acc, value), start: true };
 }
 
 export const stop = (acc) => ({

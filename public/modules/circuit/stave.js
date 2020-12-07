@@ -37,17 +37,17 @@ export default {
     };
   },
 
-  $click(acc, e) {
+  $click_(e) {
     e.preventDefault();
     const startPoint = parseInt(e.target.id.split('-')[1] || 0);
     this.signal('/player/playback', { startPoint });
   },
-  '$/player/data'(acc, { bars, autograph }) {
+  '$/player/data_'({ bars, autograph }) {
     bars.forEach((data, bid) => {
       bar(this.el, bid, data, autograph);
     });
   },
-  '$/player/play'(acc, { bvn, data: { bars, autograph } }) {
+  '$/player/play_'({ bvn, data: { bars, autograph } }) {
     const [bid, nid] = bvn;
     bar(this.el, bid, bars[bid], autograph);
     document.getElementById(`n-${bid}-${0}-${nid}`).scrollIntoView();
