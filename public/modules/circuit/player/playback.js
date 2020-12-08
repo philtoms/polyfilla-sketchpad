@@ -1,6 +1,6 @@
 export function playback(acc, { startPoint }) {
   const {
-    play,
+    record,
     data: {
       bars,
       autograph: { tempo, timeSignature, voices },
@@ -12,15 +12,15 @@ export function playback(acc, { startPoint }) {
 
   const bid = Math.max(0, startPoint - 1);
   const bidEnd = startPoint ? bid + this.count + 2 : bid + this.count;
-  play.nextBar = startPoint;
+  record.nextBar = startPoint;
   const [beats] = timeSignature.split('/');
   const tbeats = (beats * 60) / tempo;
 
   const cb = ({ bid, last, first, touch, loop }) => {
     this.signal('/compose/touch/draw', touch);
-    play.nextBar = bid;
+    record.nextBar = bid;
     if (first) {
-      play.nextNote = 0;
+      record.nextNote = 0;
       voicebox.time = 0;
     }
     if (last && loop) {

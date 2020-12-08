@@ -2,7 +2,7 @@ import client from '../../utils/client.js';
 
 export function start(acc, value) {
   // toggle state change
-  return { ...play(acc, value), start: true };
+  return { ...record(acc, value), start: true };
 }
 
 export const stop = (acc) => ({
@@ -11,11 +11,11 @@ export const stop = (acc) => ({
   start: false,
 });
 
-export const play = (acc, { vid, touch, name }) => {
+export const record = (acc, { vid, touch, name }) => {
   let {
     data,
     voicebox,
-    play: { previousNote, nextNote, nextBar, nextTime } = {},
+    record: { previousNote, nextNote, nextBar, nextTime } = {},
   } = acc;
 
   if (nextTime === null) {
@@ -44,7 +44,7 @@ export const play = (acc, { vid, touch, name }) => {
     client.batch(data.bars[bid][vid], data.autograph.title);
     return {
       ...acc,
-      play: {
+      record: {
         previousNote,
         nextNote,
         nextTime,

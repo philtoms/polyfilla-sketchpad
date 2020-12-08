@@ -5,7 +5,7 @@ import stave from './stave.js';
 import metronome from './metronome.js';
 import touch from './canvas/touch-area.js';
 import backdrop from './canvas/touch-backdrop.js';
-import player, { go, start, play, stop, playback } from './player/index.js';
+import player, { go, start, record, stop, playback } from './player/index.js';
 
 export default () =>
   circuit({
@@ -30,7 +30,7 @@ export default () =>
     player: {
       go$click: go,
       'start$/compose/touch/touchstart': start,
-      'play$/compose/touch/touchmove': play,
+      'record$/compose/touch/touchmove': record,
       'stop$/compose/touch/touchend': stop,
       playback,
       ...player,

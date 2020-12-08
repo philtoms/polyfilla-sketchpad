@@ -1,6 +1,6 @@
 import voicebox from '../../utils/voicebox.js';
 
-export { start, play, stop } from './play.js';
+export { start, record, stop } from './record.js';
 export { playback } from './playback.js';
 
 export function go(acc, e) {
@@ -8,7 +8,7 @@ export function go(acc, e) {
   this.el.className = 'compose';
   return {
     ...acc,
-    play: {
+    record: {
       previousNote: '',
       nextNote: 0,
       nextBar: 0,

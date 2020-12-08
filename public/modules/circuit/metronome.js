@@ -15,7 +15,7 @@ export default {
       this.el.className = `${beat} blink-${!blink}`;
     });
   },
-  '$/player/play'(acc, { bvn }) {
+  '$/player/record_'({ bvn }) {
     this.bin = bvn[0];
   },
 };
