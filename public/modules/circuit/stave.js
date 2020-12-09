@@ -47,7 +47,7 @@ export default {
       bar(this.el, bid, data, autograph);
     });
   },
-  '$/player/play_'({ bvn, data: { bars, autograph } }) {
+  '$/player/record_'({ bvn, data: { bars, autograph } }) {
     const [bid, nid] = bvn;
     bar(this.el, bid, bars[bid], autograph);
     document.getElementById(`n-${bid}-${0}-${nid}`).scrollIntoView();

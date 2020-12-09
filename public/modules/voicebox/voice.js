@@ -5,26 +5,26 @@ export default (ctx, sampleData) => {
   const samples = {};
   Object.entries(sampleData).map(
     ([spn, url]) =>
-      new Promise(resolve => {
+      new Promise((resolve) => {
         const request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.responseType = 'arraybuffer';
         request.onload = () => {
           ctx.decodeAudioData(
             request.response,
-            buffer => {
+            (buffer) => {
               samples[spn] = { spn, buffer, playbackRate: 1 };
               naturals.push(samples[spn]);
               resolve();
             },
-            err => console.error(err)
+            (err) => console.error(err)
           );
         };
         request.send();
       })
   );
 
-  return spn => {
+  return (spn) => {
     let sample = samples[spn];
     if (!sample) {
       ({ sample } = naturals.reduce(
@@ -36,8 +36,8 @@ export default (ctx, sampleData) => {
               sample: {
                 ...src,
                 spn,
-                playbackRate: Math.pow(2, interval / 12)
-              }
+                playbackRate: Math.pow(2, interval / 12),
+              },
             };
           }
           return acc;

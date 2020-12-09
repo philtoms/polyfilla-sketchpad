@@ -1,5 +1,4 @@
 let basenotes = [];
-let noteMap;
 let span;
 let span2;
 let ospan;
@@ -8,6 +7,13 @@ let range;
 let orange;
 
 export const scale = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+const sharps = {
+  C: 'C#',
+  D: 'D#',
+  F: 'F#',
+  G: 'G#',
+  A: 'A#',
+};
 export const color = {
   C: '255,255,0',
   'C#': '255,127,0',
@@ -55,20 +61,24 @@ export const setRange = (width, height) => {
       };
     }
   }
-  noteMap = basenotes.reduce(
-    (acc, note) => ({ ...acc, [note.name]: note }),
-    {}
-  );
   return { range, span, ospan, orange };
 };
 
-export const note = (name) => noteMap[name];
+const sharpen = (note) => {
+  const key = sharps[note.key] || note.key;
+  return {
+    ...note,
+    key,
+    name: `${key}${note.octive}`,
+  };
+};
 
-export const select = (x, y) => {
+export const select = (x, y, sharp) => {
   const xpos = Math.min(orange * ospan, x);
   const ypos = Math.min(range * span, y);
-  return basenotes.find(
+  const note = basenotes.find(
     ({ pos, opos }) =>
       Math.abs(pos - ypos) <= span2 && Math.abs(opos - xpos) <= ospan2
   );
+  return (sharp && sharpen(note)) || note;
 };

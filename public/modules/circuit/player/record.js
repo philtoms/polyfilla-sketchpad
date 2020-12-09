@@ -1,17 +1,14 @@
 import client from '../../utils/client.js';
 
-export function start(acc, value) {
-  // toggle state change
-  return { ...record(acc, value), start: true };
+export function toggle(acc, value) {
+  const recording = value.draw;
+  if (recording) {
+    return { ...acc, toggle: true, ...this.signal('../record', value) };
+  }
+  return { ...acc, toggle: false, record: { ...acc.record, previousNote: '' } };
 }
 
-export const stop = (acc) => ({
-  ...acc,
-  previousNote: '',
-  start: false,
-});
-
-export const record = (acc, { vid, touch, name }) => {
+export function record(acc, { vid, touch, name = '' }) {
   let {
     data,
     voicebox,
@@ -54,4 +51,4 @@ export const record = (acc, { vid, touch, name }) => {
       },
     };
   }
-};
+}

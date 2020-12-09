@@ -11,7 +11,7 @@ export const table = {
     7: { hertz: 2093.0, midi: 96 },
     8: { hertz: 4186.0, midi: 108 },
     9: { hertz: 8372.0, midi: 120 },
-    10: { hertz: 16744, midi: null }
+    10: { hertz: 16744, midi: null },
   },
   'C#': {
     '-1': { hertz: 8.662, midi: 1 },
@@ -25,7 +25,7 @@ export const table = {
     7: { hertz: 2217.5, midi: 97 },
     8: { hertz: 4434.9, midi: 109 },
     9: { hertz: 8869.8, midi: 121 },
-    10: { hertz: 17740, midi: null }
+    10: { hertz: 17740, midi: null },
   },
   D: {
     '-1': { hertz: 9.177, midi: 2 },
@@ -39,7 +39,7 @@ export const table = {
     7: { hertz: 2349.3, midi: 98 },
     8: { hertz: 4698.6, midi: 110 },
     9: { hertz: 9397.3, midi: 122 },
-    10: { hertz: 18795, midi: null }
+    10: { hertz: 18795, midi: null },
   },
   'D#': {
     '-1': { hertz: 9.7227, midi: 3 },
@@ -53,7 +53,7 @@ export const table = {
     7: { hertz: 2489.0, midi: 99 },
     8: { hertz: 4978.0, midi: 111 },
     9: { hertz: 9956.1, midi: 123 },
-    10: { hertz: 19912, midi: null }
+    10: { hertz: 19912, midi: null },
   },
   E: {
     '-1': { hertz: 10.301, midi: 4 },
@@ -67,7 +67,7 @@ export const table = {
     7: { hertz: 2637.0, midi: 100 },
     8: { hertz: 5274.0, midi: 112 },
     9: { hertz: 10548, midi: 124 },
-    10: { hertz: 21096, midi: null }
+    10: { hertz: 21096, midi: null },
   },
   F: {
     '-1': { hertz: 10.914, midi: 5 },
@@ -81,7 +81,7 @@ export const table = {
     7: { hertz: 2793.8, midi: 101 },
     8: { hertz: 5587.7, midi: 113 },
     9: { hertz: 11175, midi: 125 },
-    10: { hertz: 22351, midi: null }
+    10: { hertz: 22351, midi: null },
   },
   'F#': {
     '-1': { hertz: 11.563, midi: 6 },
@@ -95,7 +95,7 @@ export const table = {
     7: { hertz: 2960.0, midi: 102 },
     8: { hertz: 5919.9, midi: 114 },
     9: { hertz: 11840, midi: 126 },
-    10: { hertz: 23680, midi: null }
+    10: { hertz: 23680, midi: null },
   },
   G: {
     '-1': { hertz: 12.25, midi: 7 },
@@ -109,7 +109,7 @@ export const table = {
     7: { hertz: 3136.0, midi: 103 },
     8: { hertz: 6271.9, midi: 115 },
     9: { hertz: 12544, midi: 127 },
-    10: { hertz: 25088, midi: null }
+    10: { hertz: 25088, midi: null },
   },
   'G#': {
     '-1': { hertz: 12.979, midi: 8 },
@@ -123,7 +123,7 @@ export const table = {
     7: { hertz: 3322.4, midi: 104 },
     8: { hertz: 6644.9, midi: 116 },
     9: { hertz: 13290, midi: null },
-    10: { hertz: 26580, midi: null }
+    10: { hertz: 26580, midi: null },
   },
   A: {
     '-1': { hertz: 13.75, midi: 9 },
@@ -137,7 +137,7 @@ export const table = {
     7: { hertz: 3520.0, midi: 105 },
     8: { hertz: 7040.0, midi: 117 },
     9: { hertz: 14080, midi: null },
-    10: { hertz: 28160, midi: null }
+    10: { hertz: 28160, midi: null },
   },
   'A#': {
     '-1': { hertz: 14.568, midi: 10 },
@@ -151,7 +151,7 @@ export const table = {
     7: { hertz: 3729.3, midi: 106 },
     8: { hertz: 7458.6, midi: 118 },
     9: { hertz: 14917, midi: null },
-    10: { hertz: 29834, midi: null }
+    10: { hertz: 29834, midi: null },
   },
   B: {
     '-1': { hertz: 15.434, midi: 11 },
@@ -165,14 +165,16 @@ export const table = {
     7: { hertz: 3951.1, midi: 107 },
     8: { hertz: 7902.1, midi: 119 },
     9: { hertz: 15804, midi: null },
-    10: { hertz: 31609, midi: null }
-  }
+    10: { hertz: 31609, midi: null },
+  },
 };
 
 const bTable = {
   Ab: table['G#'],
   Bb: table['A#'],
-  Eb: table['D#']
+  Db: table['C#'],
+  Eb: table['D#'],
+  Gb: table['F#'],
 };
 
 const spnTable = Object.entries({ ...table, ...bTable }).reduce(
@@ -181,10 +183,10 @@ const spnTable = Object.entries({ ...table, ...bTable }).reduce(
     ...Object.entries(value).reduce(
       (acc, [octive, value]) => ({
         ...acc,
-        [`${key}${octive}`]: { ...value, octive, label: `${key}${octive}` }
+        [`${key}${octive}`]: { ...value, octive, label: `${key}${octive}` },
       }),
       {}
-    )
+    ),
   }),
   {}
 );
@@ -192,7 +194,7 @@ const spnTable = Object.entries({ ...table, ...bTable }).reduce(
 export const pitchTable = Object.values(spnTable).reduce(
   (acc, { hertz, ...rest }) => ({
     ...acc,
-    [hertz]: rest
+    [hertz]: rest,
   }),
   {}
 );
@@ -203,13 +205,13 @@ export const midiTable = Object.values(spnTable).reduce(
       ? acc
       : {
           ...acc,
-          [midi]: rest
+          [midi]: rest,
         },
   {}
 );
 
-export const fromPitch = pitch => pitchTable[pitch];
-export const fromMidi = midi => midiTable[midi];
-export const fromSPN = spn => spnTable[spn];
+export const fromPitch = (pitch) => pitchTable[pitch];
+export const fromMidi = (midi) => midiTable[midi];
+export const fromSPN = (spn) => spnTable[spn];
 
 export default spnTable;

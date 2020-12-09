@@ -49,21 +49,18 @@ label {
   display: block;
 }
 
-#sketch::-webkit-scrollbar {
+#stave::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
 }
 
-#sketch {
+#stave {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  width: 40%;
+  width: 90vw;
   margin: 0 auto;
   overflow-x: scroll;
   height: 50px;
   padding: 10px;
-}
-
-#stave {
   white-space: nowrap;
 }
 

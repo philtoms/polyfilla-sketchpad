@@ -1,10 +1,10 @@
 import { copy, draw, fade } from '../../utils/touch.js';
 import { select } from '../../utils/notes.js';
 
-const touchDraw = ({ ctxDraw, ctxCopy }, touches, fill = '') => {
+const touchDraw = ({ ctxDraw, ctxCopy, keyboard }, touches, fill = '') => {
   const touch = ctxCopy(touches, fill);
   ctxDraw(touch);
-  const name = select(touch.pageX, touch.pageY).name;
+  const name = select(touch.pageX, touch.pageY, keyboard).name;
   if (name) {
     return { name, vid: touch.channel, touch };
   }

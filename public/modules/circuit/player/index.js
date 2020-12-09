@@ -1,6 +1,6 @@
 import voicebox from '../../utils/voicebox.js';
 
-export { start, record, stop } from './record.js';
+export { record, toggle } from './record.js';
 export { playback } from './playback.js';
 
 export function go(acc, e) {
