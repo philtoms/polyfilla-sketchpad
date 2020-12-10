@@ -60,4 +60,6 @@ export function playback(acc, { startPoint }) {
     playloop(2);
     this.count = 0;
   }, 1000);
+
+  return acc;
 }

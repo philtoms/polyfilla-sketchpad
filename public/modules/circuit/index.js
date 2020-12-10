@@ -6,7 +6,7 @@ import metronome from './metronome.js';
 import touch from './canvas/touch-area.js';
 import backdrop from './canvas/touch-backdrop.js';
 import keyboard_ from './keyboard.js';
-import player, { go, record, toggle, playback } from './player/index.js';
+import player, { go, record, start, stop, playback } from './player/index.js';
 
 export default () =>
   circuit({
@@ -20,8 +20,8 @@ export default () =>
     stave,
     metronome,
 
-    'compose$/player/go': {
-      $state() {
+    compose: {
+      '$/player/go'() {
         this.el.className = 'compose';
       },
       backdrop,
@@ -31,10 +31,8 @@ export default () =>
 
     player: {
       go$click: go,
-      toggle: {
-        '$/compose/touch/touchstart': toggle,
-        '$/compose/touch/touchend': toggle,
-      },
+      'start$/compose/touch/touchstart': start,
+      'stop$/compose/touch/touchend': stop,
       'record$/compose/touch/touchmove': record,
       playback,
       ...player,

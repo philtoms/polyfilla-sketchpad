@@ -1,6 +1,6 @@
 import voicebox from '../../utils/voicebox.js';
 
-export { record, toggle } from './record.js';
+export { start, stop, record } from './record.js';
 export { playback } from './playback.js';
 
 export function go(acc, e) {
@@ -15,7 +15,6 @@ export function go(acc, e) {
       nextTime: null,
     },
     voicebox: voicebox.init(acc.data.autograph),
-    go: true,
   };
 }
 

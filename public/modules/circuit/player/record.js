@@ -1,14 +1,15 @@
 import client from '../../utils/client.js';
 
-export function toggle(acc, value) {
-  const recording = value.draw;
-  if (recording) {
-    return { ...acc, toggle: true, ...this.signal('../record', value) };
-  }
-  return { ...acc, toggle: false, record: { ...acc.record, previousNote: '' } };
+export function start(acc, value) {
+  return this.signal('./record', value);
 }
 
-export function record(acc, { vid, touch, name = '' }) {
+export function stop(acc) {
+  return { ...acc, record: { ...acc.record, previousNote: '' } };
+}
+
+export function record(acc, { vid, touch, name, draw }) {
+  if (!draw) return acc;
   let {
     data,
     voicebox,
