@@ -14,16 +14,23 @@ export const copy = (offsetX, offsetY) => (
   paintType,
 });
 
+let working = true;
 export const fade = (ctx, width, height) => {
   raf(() => {
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-    for (let i = 0; i < data.length; i += 4) {
-      const opacity = data[i + 3];
-      const dfade = opacity - opacity / 250;
-      data[i + 3] = Math.max(0, dfade - 1);
+    if (working) {
+      working = false;
+      const imageData = ctx.getImageData(0, 0, width, height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const opacity = data[i + 3];
+        const dfade = opacity - opacity / 250;
+        if (dfade && !working) {
+          working = true;
+        }
+        data[i + 3] = Math.max(0, dfade - 1);
+      }
+      ctx.putImageData(imageData, 0, 0);
     }
-    ctx.putImageData(imageData, 0, 0);
     fade(ctx, width, height);
   });
 };
@@ -31,6 +38,7 @@ export const fade = (ctx, width, height) => {
 export const draw = (ctx) => {
   ctx.beginPath();
   return ({ pageX, pageY, paintType }) => {
+    working = true;
     const color = `rgb(0,0,0)`;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;

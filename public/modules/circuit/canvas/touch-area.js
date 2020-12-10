@@ -1,4 +1,4 @@
-import { copy, draw, fade } from '../../utils/touch.js';
+import { copy, draw, fade } from '../../utils/canvas.js';
 import { select } from '../../utils/notes.js';
 
 const touchDraw = ({ ctxDraw, ctxCopy, keyboard }, touches, fill = '') => {
