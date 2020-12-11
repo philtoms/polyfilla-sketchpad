@@ -1,18 +1,29 @@
 const raf = requestAnimationFrame.bind(window) || setTimeout.bind(window);
 
-export const copy = (offsetX, offsetY) => (
-  { identifier = 0, pageX, pageY, radiusX, radiusY, rotationAngle, force },
-  paintType
-) => ({
-  channel: identifier,
-  pageX: Math.abs(pageX - offsetX),
-  pageY: Math.abs(pageY - offsetY),
-  radiusX,
-  radiusY,
-  rotationAngle,
-  force,
-  paintType,
-});
+export const copy = (offsetX, offsetY) => (touches, paintType) => {
+  const { identifier, pageX, pageY, radiusX, radiusY, rotationAngle, force } =
+    // touches.length > 1
+    //   ? Array.from(touches).reduce(
+    //       (acc, touch) => {
+    //         return acc.pageX > touch.pageX ? touch : acc;
+    //       },
+    //       { pageX: Number.MAX_VALUE }
+    //     )
+    //   : touches[0];
+    touches[0];
+  return (
+    pageY >= offsetY && {
+      channel: 0, // single voice only
+      pageX: Math.abs(pageX - offsetX),
+      pageY: Math.abs(pageY - offsetY),
+      radiusX,
+      radiusY,
+      rotationAngle,
+      force,
+      paintType,
+    }
+  );
+};
 
 let working = true;
 export const fade = (ctx, width, height) => {

@@ -3,10 +3,12 @@ import { select } from '../../utils/notes.js';
 
 const touchDraw = ({ ctxDraw, ctxCopy, keyboard }, touches, fill = '') => {
   const touch = ctxCopy(touches, fill);
-  ctxDraw(touch);
-  const name = select(touch.pageX, touch.pageY, keyboard).name;
-  if (name) {
-    return { name, vid: touch.channel, touch };
+  if (touch) {
+    ctxDraw(touch);
+    const name = select(touch.pageX, touch.pageY, keyboard).name;
+    if (name) {
+      return { name, vid: touch.channel, touch };
+    }
   }
 };
 
@@ -14,17 +16,19 @@ function $touchstart(acc, e) {
   e.preventDefault();
   return {
     ...acc,
-    ...touchDraw(acc, (e.changedTouches || [e])[0], 'fill'),
+    ...touchDraw(acc, e.changedTouches || [e], 'fill'),
     draw: true,
   };
 }
 
 function $touchmove(acc, e) {
-  e.preventDefault();
+  // if (e.cancelable) {
+  //   e.preventDefault();
+  // }
   if (acc.draw) {
     return {
       ...acc,
-      ...touchDraw(acc, (e.changedTouches || [e])[0]),
+      ...touchDraw(acc, e.changedTouches || [e]),
     };
   }
 }
@@ -32,7 +36,7 @@ function $touchmove(acc, e) {
 function $touchend(acc, e) {
   e.preventDefault();
   const { ctxCopy } = acc;
-  const touch = ctxCopy((e.changedTouches || [e])[0]);
+  const touch = ctxCopy(e.changedTouches || [e]);
   return { ...acc, touch, draw: false };
 }
 
