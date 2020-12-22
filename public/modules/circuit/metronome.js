@@ -5,13 +5,11 @@ export default {
     let tick = '';
     let blink = true;
     subscribe((beat) => {
-      if (this.bin) {
-        if (tick) {
-          document.getElementsByClassName(tick)[0].classList.remove(tick);
-        }
-        tick = `tick-${beat + 1}`;
-        document.getElementById(`b-${this.bin}`).classList.add(tick);
+      if (tick) {
+        document.getElementsByClassName(tick)[0].classList.remove(tick);
       }
+      tick = `tick-${beat + 1}`;
+      document.getElementById(`b-${this.bin || 0}`).classList.add(tick);
       this.el.className = `${beat} blink-${!blink}`;
     });
   },

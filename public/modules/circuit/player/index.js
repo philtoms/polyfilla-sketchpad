@@ -24,4 +24,12 @@ export default {
     data,
   }),
   go,
+  'tempo$/autograph/tempo'(acc, value) {
+    acc.voicebox.tempo = value;
+    return acc;
+  },
+  'timeSignature$/autograph/timeSignature'(acc, value) {
+    acc.voicebox.timeSignature = value;
+    return acc;
+  },
 };
