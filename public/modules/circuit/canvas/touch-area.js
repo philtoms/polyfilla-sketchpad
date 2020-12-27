@@ -5,7 +5,7 @@ const touchDraw = ({ ctxDraw, ctxCopy, keyboard }, touches, fill = '') => {
   const touch = ctxCopy(touches, fill);
   if (touch) {
     ctxDraw(touch);
-    const name = select(touch.pageX, touch.pageY, keyboard).name;
+    const name = select(touch.pageX, touch.pageY, !fill, keyboard).name;
     if (name) {
       return { name, vid: touch.channel, touch };
     }
@@ -13,7 +13,7 @@ const touchDraw = ({ ctxDraw, ctxCopy, keyboard }, touches, fill = '') => {
 };
 
 function $touchstart(acc, e) {
-  e.preventDefault();
+  // e.preventDefault();
   return {
     ...acc,
     ...touchDraw(acc, e.changedTouches || [e], 'fill'),
@@ -34,7 +34,7 @@ function $touchmove(acc, e) {
 }
 
 function $touchend(acc, e) {
-  e.preventDefault();
+  // e.preventDefault();
   const { ctxCopy } = acc;
   const touch = ctxCopy(e.changedTouches || [e]);
   return { ...acc, touch, draw: false };
@@ -70,12 +70,21 @@ export default {
   $touchmove,
   $touchend,
   $mousedown(acc, e) {
-    return this.signal('./touchstart', e);
+    return this.signal('./touchstart', {
+      pageX: e.pageX - 7,
+      pageY: e.pageY - 15,
+    });
   },
   $mouseup(acc, e) {
-    return this.signal('./touchend', e);
+    return this.signal('./touchend', {
+      pageX: e.pageX - 7,
+      pageY: e.pageY - 15,
+    });
   },
   $mousemove(acc, e) {
-    return this.signal('./touchmove', e);
+    return this.signal('./touchmove', {
+      pageX: e.pageX - 7,
+      pageY: e.pageY - 15,
+    });
   },
 };
