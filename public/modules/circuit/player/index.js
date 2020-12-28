@@ -14,7 +14,7 @@ export function go(acc, e) {
       nextBar: 0,
       nextTime: null,
     },
-    voicebox: voicebox.init(acc.data.autograph),
+    voicebox: voicebox(acc.data.autograph),
   };
 }
 

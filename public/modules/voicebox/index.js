@@ -10,17 +10,23 @@ export const unsubscribe = (cb) => {
 };
 
 export default (options) => {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)(options);
-  const source = Source(ctx);
-
   let _tempo = 60 / 120;
   let _scoreTempo = _tempo;
   let _beats = 4;
   let _noteValue = 1 / 4;
   let _ticks = 0;
   let _scheduled = [];
+  let ctx;
+  let source;
+  let baseTime;
 
-  const init = (options) => {
+  const init = () => {
+    ctx = new (window.AudioContext || window.webkitAudioContext)(options);
+    source = Source(ctx);
+    baseTime = ctx.currentTime;
+    if (options.samples) {
+      voicebox.create(options.samples);
+    }
     voicebox.tempo = options.tempo;
     _scoreTempo = _tempo;
     voicebox.timeSignature = options.timeSignature;
@@ -40,11 +46,12 @@ export default (options) => {
     return voicebox;
   };
 
-  let baseTime = ctx.currentTime;
   const voices = {};
   const voicebox = {
-    init,
-    create: (vid, data) => (voices[vid] = Voice(ctx, data)) && voicebox,
+    create: (data) =>
+      Object.entries(data).forEach(
+        ([vid, sample]) => (voices[vid] = Voice(ctx, sample))
+      ),
     get time() {
       return Math.max(0, ctx.currentTime - baseTime);
     },
@@ -113,8 +120,5 @@ export default (options) => {
       });
     },
   };
-  if (options.samples) {
-    voicebox.create(0, options.samples);
-  }
-  return voicebox;
+  return init();
 };

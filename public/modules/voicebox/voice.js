@@ -29,20 +29,28 @@ export default (ctx, sampleData) => {
     if (!sample) {
       ({ sample } = naturals.reduce(
         (acc, src) => {
-          const interval = fromSPN(spn).midi - fromSPN(src.spn).midi;
-          if (interval >= 0 && interval < acc.interval) {
+          const gap = fromSPN(spn).midi - fromSPN(src.spn).midi;
+          const interval = Math.abs(gap + 12) % 12;
+          const quality = 1 / Math.abs(gap);
+          if (quality > acc.quality || interval < acc.interval) {
+            const octive = Math.pow(
+              2,
+              parseInt((gap >= 0 ? gap : gap - 12) / 12)
+            );
+            const rate = Math.pow(2, interval / 12) * octive;
             acc = {
               interval,
+              quality,
               sample: {
                 ...src,
                 spn,
-                playbackRate: Math.pow(2, interval / 12),
+                playbackRate: rate,
               },
             };
           }
           return acc;
         },
-        { interval: Number.MAX_SAFE_INTEGER }
+        { interval: Number.MAX_SAFE_INTEGER, quality: 0 }
       ));
     }
     return (samples[spn] = sample);

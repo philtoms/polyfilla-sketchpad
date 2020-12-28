@@ -86,5 +86,5 @@ export const select = (x, y, center, sharp) => {
     ({ pos, opos }) =>
       Math.abs(pos - ypos) <= spot && Math.abs(opos - xpos) <= ospot
   );
-  return (sharp && sharpen(note)) || note || {};
+  return (sharp && note && sharpen(note)) || note || {};
 };
