@@ -1,7 +1,7 @@
-import { setRange, scale, color, select } from '../../utils/notes.js';
+import { setRange, scale, color, select } from './notes.js';
 
 export default {
-  $state(acc) {
+  '$/player/data'(acc) {
     const { el } = this;
     const noteRange = setRange(
       el.parentElement.clientWidth,

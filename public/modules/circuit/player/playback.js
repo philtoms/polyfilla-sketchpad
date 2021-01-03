@@ -1,10 +1,8 @@
 export function playback(acc, { startPoint }) {
   const {
     record,
-    data: {
-      bars,
-      autograph: { tempo, timeSignature, voices },
-    },
+    bars,
+    autograph: { tempo, timeSignature, voices },
     voicebox,
   } = acc;
 

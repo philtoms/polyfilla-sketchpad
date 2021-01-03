@@ -1,4 +1,4 @@
-import voicebox from '../voicebox/index.js';
+import voicebox from '../../voicebox/index.js';
 
 const assets = 'https://cdn.glitch.com/ee40e085-f63b-4369-9a4a-dc97bb39e335%2F';
 

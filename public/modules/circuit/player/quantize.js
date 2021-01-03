@@ -11,7 +11,7 @@ const BIGTIME = Number.MAX_VALUE;
     t1=2         1         2         4         5
 
 */
-export default ({ tempo, timeSignature }, data) => {
+export default ({ tempo, timeSignature }, bars) => {
   const [bar, beat] = timeSignature.split('/');
   const tbar = (bar * 60) / tempo;
   const tbar2 = tbar + tbar;
@@ -83,10 +83,10 @@ export default ({ tempo, timeSignature }, data) => {
       note.nid = 0;
       time %= tbar;
     }
-    const bar = data.bars[bid] || {
+    const bar = bars[bid] || {
       bid,
     };
-    data.bars[bid] = bar;
+    bars[bid] = bar;
 
     const voice = bar[vid] || { vid, bid, notes: [] };
     bar[vid] = voice;

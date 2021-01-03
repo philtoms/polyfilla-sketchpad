@@ -1,5 +1,16 @@
-import { copy, draw, fade } from '../../utils/canvas.js';
-import { select } from '../../utils/notes.js';
+import { copy, draw, fade } from './canvas.js';
+import { select } from './notes.js';
+
+const touchCtx = (el, { backdrop: { noteRange }, ctxDraw }) => {
+  if (noteRange && !ctxDraw) {
+    const drawCtx = el.getContext('2d');
+    ctxDraw = draw(drawCtx);
+    el.width = noteRange.orange * noteRange.ospan;
+    el.height = noteRange.range * noteRange.span;
+    fade(drawCtx, el.width, el.height);
+  }
+  return ctxDraw;
+};
 
 const touchDraw = ({ ctxDraw, ctxCopy, keyboard }, touches, fill = '') => {
   const touch = ctxCopy(touches, fill);
@@ -13,7 +24,6 @@ const touchDraw = ({ ctxDraw, ctxCopy, keyboard }, touches, fill = '') => {
 };
 
 function $touchstart(acc, e) {
-  // e.preventDefault();
   return {
     ...acc,
     ...touchDraw(acc, e.changedTouches || [e], 'fill'),
@@ -22,19 +32,15 @@ function $touchstart(acc, e) {
 }
 
 function $touchmove(acc, e) {
-  // if (e.cancelable) {
-  //   e.preventDefault();
-  // }
-  if (acc.draw) {
-    return {
-      ...acc,
-      ...touchDraw(acc, e.changedTouches || [e]),
-    };
-  }
+  return acc.draw
+    ? {
+        ...acc,
+        ...touchDraw(acc, e.changedTouches || [e]),
+      }
+    : acc;
 }
 
 function $touchend(acc, e) {
-  // e.preventDefault();
   const { ctxCopy } = acc;
   const touch = ctxCopy(e.changedTouches || [e]);
   return { ...acc, touch, draw: false };
@@ -42,11 +48,7 @@ function $touchend(acc, e) {
 
 export default {
   $state(acc) {
-    let {
-      backdrop: { noteRange },
-      ctxDraw,
-      ctxCopy,
-    } = acc;
+    let { ctxCopy } = acc;
     const el = this.el;
     if (el.offsetParent) {
       ctxCopy = copy(
@@ -54,17 +56,12 @@ export default {
         el.offsetTop + el.offsetParent.offsetTop
       );
     }
-    if (noteRange && !ctxDraw) {
-      const drawCtx = el.getContext('2d');
-      ctxDraw = draw(drawCtx);
-      el.width = noteRange.orange * noteRange.ospan;
-      el.height = noteRange.range * noteRange.span;
-      fade(drawCtx, el.width, el.height);
-    }
-    return { ...acc, ctxDraw, ctxCopy };
+    return { ...acc, ctxCopy, ctxDraw: touchCtx(el, acc) };
   },
-  $draw: ({ ctxDraw }, touch) => {
+  $draw(acc, touch) {
+    const ctxDraw = touchCtx(this.el, acc);
     ctxDraw(touch);
+    return { ...acc, ctxDraw };
   },
   $touchstart,
   $touchmove,

@@ -22,18 +22,14 @@ const bar = (el, bid, bar, autograph) => {
 };
 
 export default {
-  $init(acc) {
+  $init() {
     const channels = Array.from(this.el.children).reduce(
       (acc, el, channel) => ({ ...acc, [channel]: el }),
       {}
     );
     return {
-      ...acc,
-      stave: {
-        ...stave,
-        barCount: 0,
-        channels,
-      },
+      barCount: 0,
+      channels,
     };
   },
 
@@ -42,14 +38,16 @@ export default {
     const startPoint = parseInt(e.target.id.split('-')[1] || 0);
     this.signal('/player/playback', { startPoint });
   },
-  '$/player/data_'({ bars, autograph }) {
+  '$/score/go_'({ bars, autograph }) {
     bars.forEach((data, bid) => {
       bar(this.el, bid, data, autograph);
     });
   },
-  '$/player/record_'({ bvn, data: { bars, autograph } }) {
+  '$/player/record'(acc, { bvn }) {
+    const { score } = acc;
     const [bid, nid] = bvn;
-    bar(this.el, bid, bars[bid], autograph);
+    bar(this.el, bid, score.bars[bid], score.autograph);
     document.getElementById(`n-${bid}-${0}-${nid}`).scrollIntoView();
+    return acc;
   },
 };

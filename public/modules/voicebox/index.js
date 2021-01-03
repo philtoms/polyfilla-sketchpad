@@ -42,7 +42,7 @@ export default (options) => {
       const tick = _ticks++ % _beats;
       _subscriptions.forEach((cb) => cb(tick));
     };
-    clock();
+    source({ cb: clock, stop: _tempo });
     return voicebox;
   };
 

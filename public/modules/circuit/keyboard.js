@@ -1,5 +1,5 @@
 export default {
-  $init(state) {
+  $init() {
     document.addEventListener(
       'keydown',
       () => {
@@ -28,6 +28,6 @@ export default {
       },
       false
     );
-    return { ...state, keyboard: false };
+    return false;
   },
 };
