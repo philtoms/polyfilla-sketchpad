@@ -25,31 +25,35 @@ export const copy = (offsetX, offsetY) => (touches, paintType) => {
   );
 };
 
-let working = true;
-export const fade = (ctx, width, height) => {
-  raf(() => {
-    if (working) {
-      working = false;
+let working = false;
+export const fade = (ctx, width, height, idx = 0) => {
+  if (!working) {
+    working = true;
+    let fading = false;
+    raf(() => {
       const imageData = ctx.getImageData(0, 0, width, height);
       const data = imageData.data;
       for (let i = 0; i < data.length; i += 4) {
         const opacity = data[i + 3];
-        const dfade = opacity - opacity / 250;
-        if (dfade && !working) {
-          working = true;
+        const step = parseInt(opacity - opacity / 5);
+        const dfade = Math.max(0, step);
+        if (dfade) {
+          fading = true;
+          if (idx % 10 === 0) data[i + 3] = dfade;
         }
-        data[i + 3] = Math.max(0, dfade - 1);
       }
       ctx.putImageData(imageData, 0, 0);
-    }
-    fade(ctx, width, height);
-  });
+      working = false;
+      if (fading) {
+        fade(ctx, width, height, idx + 1);
+      }
+    });
+  }
 };
 
-export const draw = (ctx) => {
+export const draw = (ctx, width, height) => {
   ctx.beginPath();
   return ({ pageX, pageY, paintType }) => {
-    working = true;
     const color = `rgb(0,0,0)`;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
@@ -62,5 +66,6 @@ export const draw = (ctx) => {
       ctx.lineTo(pageX, pageY);
       ctx.stroke();
     }
+    fade(ctx, width, height);
   };
 };
