@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "asbundle": "^2.6.0",
-    "terser": "^4.6.9"
+    "terser": "^4.8.1"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/hello-express"
