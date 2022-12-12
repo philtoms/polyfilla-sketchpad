@@ -12,7 +12,7 @@
   "dependencies": {
     "dom-circuit": "philtoms/dom-circuit",
     "esm": "^3.2.25",
-    "express": "^4.17.1"
+    "express": "^4.17.3"
   },
   "devDependencies": {
     "asbundle": "^2.6.0",
